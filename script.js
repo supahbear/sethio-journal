@@ -527,7 +527,7 @@ class TTRPGHub {
 
   renderRecapsList(entries, commentsMap = {}) {
     const WORD_LIMIT  = 60;
-    const CHARACTERS  = ['ash', 'missy', 'salwyck', 'toby', 'zilrion'];
+    const CHARACTERS  = ['entos', 'nadrius', 'louise', 'casseus'];
     if (!entries || entries.length === 0) {
       return '<div class="recaps-empty">No entries found in the Campaign Log.</div>';
     }
@@ -535,9 +535,9 @@ class TTRPGHub {
     const sorted = [...entries].reverse();
     this._recapEntries = sorted; // stash for edit handler
     const items = sorted.map((entry, i) => {
-      const tag     = (entry.tag     || '').trim();
+      const chapter = (entry.chapter || '').trim();
       const title   = (entry.title   || '').trim();
-      const content = (entry.content || '').trim();
+      const content = (entry.summary  || '').trim();
       const words   = content.split(/\s+/).filter(Boolean);
       const isTruncated = words.length > WORD_LIMIT;
       const preview     = isTruncated ? words.slice(0, WORD_LIMIT).join(' ') + '\u2026' : content;
@@ -580,7 +580,7 @@ class TTRPGHub {
         <article class="recap-entry" data-index="${i}">
           <div class="recap-entry-header" role="button" tabindex="0" aria-expanded="false">
             <h2 class="recap-title">${title}</h2>
-            ${tag ? `<span class="recap-tag">${tag}</span>` : ''}
+            ${chapter ? `<span class="recap-tag">${chapter}</span>` : ''}
             <span class="recap-collapse-icon" aria-hidden="true"></span>
           </div>
           <div class="recap-body recap-body--collapsed">
@@ -600,8 +600,8 @@ class TTRPGHub {
         <button class="new-chapter-btn">+ New Chapter</button>
         <form class="new-chapter-form" hidden>
           <input  class="new-chapter-title"   type="text"     placeholder="Chapter title (required)" maxlength="120" />
-          <input  class="new-chapter-tag"     type="text"     placeholder="Tag (optional, e.g. Session 12)" maxlength="60" />
-          <textarea class="new-chapter-content" rows="4"     placeholder="Summary / OOC notes (optional)"></textarea>
+          <input  class="new-chapter-chapter" type="text"     placeholder="Chapter (optional, e.g. Chapter 1: Early days)" maxlength="120" />
+          <textarea class="new-chapter-summary" rows="4"      placeholder="Summary / OOC notes (optional)"></textarea>
           <div class="new-chapter-actions">
             <button type="submit" class="new-chapter-submit">Create Chapter</button>
             <button type="button" class="new-chapter-cancel">Cancel</button>
@@ -804,8 +804,8 @@ class TTRPGHub {
       e.preventDefault();
       const form    = e.target.closest('.new-chapter-form');
       const title   = form.querySelector('.new-chapter-title').value.trim();
-      const tag     = form.querySelector('.new-chapter-tag').value.trim();
-      const content = form.querySelector('.new-chapter-content').value.trim();
+      const chapter = form.querySelector('.new-chapter-chapter').value.trim();
+      const content = form.querySelector('.new-chapter-summary').value.trim();
       const errEl   = form.querySelector('.new-chapter-error');
       const submitBtn = form.querySelector('.new-chapter-submit');
       if (!title) {
@@ -817,7 +817,7 @@ class TTRPGHub {
       errEl.hidden = true;
       submitBtn.textContent = 'Creatingâ€¦';
       submitBtn.disabled = true;
-      const result = await this._saveNewChapter({ title, tag, content });
+      const result = await this._saveNewChapter({ title, chapter, content });
       if (result?.success) {
         // Reload the campaign panel to show the new entry
         const panel = body.closest('#journalTabCampaignLog');
@@ -884,13 +884,13 @@ class TTRPGHub {
     }
   }
 
-  async _saveNewChapter({ title, tag, content }) {
+  async _saveNewChapter({ title, chapter, content }) {
     try {
       const row = {
         id:      Date.now().toString(),
         title,
-        tag,
-        content,
+        chapter,
+        summary: content,
         visible: 'TRUE'
       };
       const payload = JSON.stringify({ sheet: 'Recaps', row });
