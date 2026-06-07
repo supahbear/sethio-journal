@@ -1,60 +1,38 @@
-/**
- * NEXUS — Google Apps Script Backend
- * One workbook, one sheet per category.
+﻿/**
+ * SethioJournal — Google Apps Script Backend
+ * One workbook, sheets: Recaps | Comments | Gallery
  * All responses use JSONP to sidestep CORS restrictions on Apps Script web apps.
  *
  * Supported GET params:
- *   ?sheets=Characters            → single sheet, returns array of row objects
- *   ?sheets=Characters,Factions   → multiple sheets merged; each row gains _category field
- *   ?filter_visible=true          → (default true) skip rows where visible === FALSE
- *   ?callback=xxx                 → JSONP callback name (required by frontend)
+ *   ?sheets=Recaps              → single sheet, returns array of row objects
+ *   ?sheets=Recaps,Comments     → multiple sheets merged; each row gains ._category field
+ *   ?callback=xxx               → JSONP callback name (required by frontend)
+ *   ?action=write&payload=...   → append a new row
+ *   ?action=edit&payload=...    → patch an existing row
+ *   ?action=delete&payload=...  → delete a row by id
  */
 
-const SHEET_ID = '11dLpf_wqHdRZu1EpvD3CMiGQKuj1aCQf47R9pyscUb4';
+const SHEET_ID            = '1bz8g1HUAfTMQ73QFSwHw_XKWdUZ-f7PfHsBMiM7Xfk8';
+const DISCORD_WEBHOOK_URL = 'REPLACE_WITH_DISCORD_WEBHOOK_URL';
+const JOURNAL_BASE_URL    = 'https://sethio.netlify.app/';
 
-// Discord webhook — posts to your channel when Recaps, Journal entries, or Articles are created
-const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1503471265078313041/tTFAowBOIp4203SN86YOWus-fXIjqGk3IjcXmi3dpD3EKFHIg-W5W3CdARW-ZqKNzCWZ';
+// Sheets that may be written to via action=write/edit/delete
+const ALLOWED_SHEETS = ['Recaps', 'Comments', 'Gallery'];
 
-// Base URL for deep-link hashes posted to Discord
-const NEXUS_BASE_URL = 'https://btvnexus.netlify.app/';
-
-// Sheets that may be written to — used by handleWrite, handleEdit, and handleDelete
-const ALLOWED_SHEETS = [
-  'Nations', 'Species', 'Deities', 'History', 'Literature', 'Society', 'Technology',
-  'Characters', 'Factions', 'Bestiary', 'Items', 'Alchemy', 'Locations', 'Calendar',
-  'Inventory', 'PartyFund', 'Settings', 'Recaps', 'Journal', 'Gallery', 'Comments'
-];
+// Character columns on the Recaps sheet that hold IC journal entries (lowercase — matches readSheet output)
+const RECAP_CHARACTER_COLUMNS = ['entos', 'nadrius', 'louise', 'casseus'];
 
 // ---------------------------------------------------------------------------
-// Entry points
+// Entry point
 // ---------------------------------------------------------------------------
 function doGet(e) {
+  const callback = (e && e.parameter && e.parameter.callback) || 'callback';
   try {
-    const callback      = e.parameter.callback || 'callback';
+    if (e.parameter.action === 'write')  return handleWrite(e, callback);
+    if (e.parameter.action === 'edit')   return handleEdit(e, callback);
+    if (e.parameter.action === 'delete') return handleDelete(e, callback);
 
-    // Write action — triggered by ArticleWriter via JSONP GET (works from file://)
-    if (e.parameter.action === 'write') {
-      return handleWrite(e, callback);
-    }
-    // Edit action — finds existing row by name (or id) and overwrites it
-    if (e.parameter.action === 'edit') {
-      return handleEdit(e, callback);
-    }
-    // Delete action — removes a row by its id field
-    if (e.parameter.action === 'delete') {
-      return handleDelete(e, callback);
-    }
-    // Get current in-world date from the Settings sheet
-    if (e.parameter.action === 'getDate') {
-      return handleGetDate(e, callback);
-    }
-    // Set current in-world date in the Settings sheet
-    if (e.parameter.action === 'setDate') {
-      return handleSetDate(e, callback);
-    }
-    const sheetsParam  = (e.parameter.sheets || '').trim();
-    const filterVisible = (e.parameter.filter_visible || 'true') !== 'false';
-
+    const sheetsParam = (e.parameter.sheets || '').trim();
     if (!sheetsParam) {
       return jsonp(callback, { success: false, error: 'Missing required param: sheets' });
     }
@@ -63,9 +41,9 @@ function doGet(e) {
     const data = [];
 
     sheetNames.forEach(name => {
-      const rows = readSheet(name, filterVisible);
+      const rows = readSheet(name);
       rows.forEach(row => {
-        row._category = name; // inject source sheet so frontend knows where it came from
+        row._category = name;
         data.push(row);
       });
     });
@@ -74,24 +52,62 @@ function doGet(e) {
     return jsonp(callback, { success: true, sheets: sheetNames, data });
 
   } catch (err) {
-    const callback = (e && e.parameter && e.parameter.callback) || 'callback';
     console.error('doGet error:', err);
     return jsonp(callback, { success: false, error: String(err) });
   }
 }
 
 // ---------------------------------------------------------------------------
-// Edit handler — finds an existing row by name and overwrites it in place
+// Write — append a new row
 // ---------------------------------------------------------------------------
-function handleEdit(e, callback) {
+function handleWrite(e, callback) {
   try {
-    const raw     = e.parameter.payload;
+    const raw = e.parameter.payload;
     if (!raw) return jsonp(callback, { success: false, error: 'Missing payload' });
     const payload   = JSON.parse(raw);
     const sheetName = payload.sheet;
     const rowData   = payload.row;
-    const origName  = payload.originalName; // for name-column matching
-    const rowId     = payload.rowId;         // for id-column matching (inventory)
+
+    if (!sheetName || !ALLOWED_SHEETS.includes(sheetName)) {
+      return jsonp(callback, { success: false, error: 'Invalid or missing sheet name' });
+    }
+    if (!rowData || typeof rowData !== 'object') {
+      return jsonp(callback, { success: false, error: 'Missing row data' });
+    }
+
+    const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(sheetName);
+    if (!sheet) return jsonp(callback, { success: false, error: 'Sheet not found: ' + sheetName });
+
+    const headers   = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0].map(h => String(h).trim().toLowerCase());
+    const rowValues = headers.map(h => (rowData[h] !== undefined ? String(rowData[h]) : ''));
+    sheet.appendRow(rowValues);
+    SpreadsheetApp.flush();
+
+    if (sheetName === 'Recaps' || sheetName === 'Comments') {
+      try { notifyDiscord(sheetName, rowData); } catch (err) { console.warn('notifyDiscord failed:', err); }
+    }
+
+    console.log('Appended row to ' + sheetName + ': ' + (rowData.title || rowData.name || '(unnamed)'));
+    return jsonp(callback, { success: true });
+
+  } catch (err) {
+    console.error('handleWrite error:', err);
+    return jsonp(callback, { success: false, error: String(err) });
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Edit — patch or overwrite an existing row, matched by title or id
+// ---------------------------------------------------------------------------
+function handleEdit(e, callback) {
+  try {
+    const raw = e.parameter.payload;
+    if (!raw) return jsonp(callback, { success: false, error: 'Missing payload' });
+    const payload   = JSON.parse(raw);
+    const sheetName = payload.sheet;
+    const rowData   = payload.row;
+    const origName  = payload.originalName; // match by title column
+    const rowId     = payload.rowId;         // match by id column (Gallery)
 
     if (!sheetName || !ALLOWED_SHEETS.includes(sheetName)) {
       return jsonp(callback, { success: false, error: 'Invalid or missing sheet name' });
@@ -103,35 +119,30 @@ function handleEdit(e, callback) {
       return jsonp(callback, { success: false, error: 'Missing originalName or rowId for row lookup' });
     }
 
-    const spreadsheet = SpreadsheetApp.openById(SHEET_ID);
-    const sheet = spreadsheet.getSheetByName(sheetName);
+    const sheet   = SpreadsheetApp.openById(SHEET_ID).getSheetByName(sheetName);
     if (!sheet) return jsonp(callback, { success: false, error: 'Sheet not found: ' + sheetName });
 
-    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0].map(h => String(h).trim());
+    const headers  = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0].map(h => String(h).trim().toLowerCase());
     const lastRow  = sheet.getLastRow();
     let matchIdx   = -1;
 
     if (rowId) {
-      // Match by 'id' column — used for inventory rows
       const idCol = headers.indexOf('id');
-      if (idCol === -1) return jsonp(callback, { success: false, error: 'No "id" column found in sheet' });
+      if (idCol === -1) return jsonp(callback, { success: false, error: 'No "id" column in sheet' });
       const idVals = sheet.getRange(2, idCol + 1, lastRow - 1, 1).getValues();
       matchIdx = idVals.findIndex(r => String(r[0]).trim() === String(rowId).trim());
     } else {
-      // Match by 'name' column, or 'title' if 'name' is absent (e.g. Recaps sheet)
-      let matchCol = headers.indexOf('name');
-      if (matchCol === -1) matchCol = headers.indexOf('title');
-      if (matchCol === -1) return jsonp(callback, { success: false, error: 'No "name" or "title" column found in sheet' });
+      const matchCol = headers.indexOf('title');
+      if (matchCol === -1) return jsonp(callback, { success: false, error: 'No "title" column in sheet' });
       const matchVals = sheet.getRange(2, matchCol + 1, lastRow - 1, 1).getValues();
       matchIdx = matchVals.findIndex(r => String(r[0]).trim().toLowerCase() === origName.trim().toLowerCase());
     }
 
     if (matchIdx === -1) return jsonp(callback, { success: false, error: 'Row not found: ' + (rowId || origName) });
 
-    const targetRow = matchIdx + 2; // +1 for header, +1 for 1-based
+    const targetRow = matchIdx + 2;
 
     if (payload.patch) {
-      // Patch mode — only update the fields present in rowData, leave others untouched
       headers.forEach((h, i) => {
         if (rowData[h] !== undefined) {
           sheet.getRange(targetRow, i + 1).setValue(String(rowData[h]));
@@ -148,16 +159,12 @@ function handleEdit(e, callback) {
       if (icCol) {
         SpreadsheetApp.flush();
         try {
-          notifyDiscord('RecapIC', {
-            character:   icCol,
-            entry:       String(rowData[icCol]).trim(),
-            recap_title: origName || '',
-          });
-        } catch (notifyErr) { console.warn('notifyDiscord (edit) failed:', notifyErr); }
+          notifyDiscord('RecapIC', { character: icCol, entry: String(rowData[icCol]).trim(), recap_title: origName || '' });
+        } catch (err) { console.warn('notifyDiscord (edit) failed:', err); }
       }
     }
 
-    console.log('Updated row in ' + sheetName + ': ' + (rowData.name || rowId || origName));
+    console.log('Updated row in ' + sheetName + ': ' + (rowData.title || rowId || origName));
     return jsonp(callback, { success: true });
 
   } catch (err) {
@@ -167,7 +174,7 @@ function handleEdit(e, callback) {
 }
 
 // ---------------------------------------------------------------------------
-// Delete handler — removes a row matched by its id field
+// Delete — remove a row matched by its id field
 // ---------------------------------------------------------------------------
 function handleDelete(e, callback) {
   try {
@@ -182,16 +189,15 @@ function handleDelete(e, callback) {
     }
     if (!rowId) return jsonp(callback, { success: false, error: 'Missing id for row deletion' });
 
-    const spreadsheet = SpreadsheetApp.openById(SHEET_ID);
-    const sheet = spreadsheet.getSheetByName(sheetName);
+    const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(sheetName);
     if (!sheet) return jsonp(callback, { success: false, error: 'Sheet not found: ' + sheetName });
 
-    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0].map(h => String(h).trim());
-    const idCol   = headers.indexOf('id');
-    if (idCol === -1) return jsonp(callback, { success: false, error: 'No "id" column found in sheet' });
+    const headers  = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0].map(h => String(h).trim().toLowerCase());
+    const idCol    = headers.indexOf('id');
+    if (idCol === -1) return jsonp(callback, { success: false, error: 'No "id" column in sheet' });
 
-    const lastRow = sheet.getLastRow();
-    const idVals  = sheet.getRange(2, idCol + 1, lastRow - 1, 1).getValues();
+    const lastRow  = sheet.getLastRow();
+    const idVals   = sheet.getRange(2, idCol + 1, lastRow - 1, 1).getValues();
     const matchIdx = idVals.findIndex(r => String(r[0]).trim() === String(rowId).trim());
     if (matchIdx === -1) return jsonp(callback, { success: false, error: 'Row not found: ' + rowId });
 
@@ -206,174 +212,40 @@ function handleDelete(e, callback) {
 }
 
 // ---------------------------------------------------------------------------
-// Write handler — called from doGet when action=write
+// Sheet reader — returns all data rows as objects keyed by lowercased header
 // ---------------------------------------------------------------------------
-function handleWrite(e, callback) {
-  try {
-    const raw     = e.parameter.payload;
-    if (!raw) return jsonp(callback, { success: false, error: 'Missing payload' });
-    const payload   = JSON.parse(raw);
-    const sheetName = payload.sheet;
-    const rowData   = payload.row;
-
-    if (!sheetName || !ALLOWED_SHEETS.includes(sheetName)) {
-      return jsonp(callback, { success: false, error: 'Invalid or missing sheet name' });
-    }
-    if (!rowData || typeof rowData !== 'object') {
-      return jsonp(callback, { success: false, error: 'Missing row data' });
-    }
-
-    const spreadsheet = SpreadsheetApp.openById(SHEET_ID);
-    const sheet = spreadsheet.getSheetByName(sheetName);
-    if (!sheet) return jsonp(callback, { success: false, error: 'Sheet not found: ' + sheetName });
-
-    const headers   = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0].map(h => String(h).trim());
-    const rowValues = headers.map(h => (rowData[h] !== undefined ? String(rowData[h]) : ''));
-    sheet.appendRow(rowValues);
-    SpreadsheetApp.flush(); // commit the write before making external HTTP calls
-
-    // Notify Discord when a new recap, comment, or article is posted
-    if (sheetName === 'Recaps' || sheetName === 'Comments' || ARTICLE_SHEETS.includes(sheetName)) {
-      try { notifyDiscord(sheetName, rowData); } catch (notifyErr) { console.warn('notifyDiscord (write) failed:', notifyErr); }
-    }
-
-    console.log('Appended row to ' + sheetName + ': ' + (rowData.name || '(unnamed)'));
-    return jsonp(callback, { success: true });
-
-  } catch (err) {
-    console.error('handleWrite error:', err);
-    return jsonp(callback, { success: false, error: String(err) });
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Get / Set current in-world date — stored in the Settings sheet
-// Sheet layout: headers in row 1 (day | monthIndex | year), values in row 2
-// ---------------------------------------------------------------------------
-function handleGetDate(e, callback) {
-  try {
-    const spreadsheet = SpreadsheetApp.openById(SHEET_ID);
-    const sheet = spreadsheet.getSheetByName('Settings');
-    if (!sheet) return jsonp(callback, { success: false, error: 'Settings sheet not found' });
-    if (sheet.getLastRow() < 2) return jsonp(callback, { success: false, error: 'Settings sheet has no data row' });
-
-    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0].map(h => String(h).trim().toLowerCase());
-    const row     = sheet.getRange(2, 1, 1, sheet.getLastColumn()).getValues()[0];
-
-    const dayCol        = headers.indexOf('day');
-    const monthIndexCol = headers.indexOf('monthindex');
-    const yearCol       = headers.indexOf('year');
-
-    if (dayCol === -1 || monthIndexCol === -1 || yearCol === -1) {
-      return jsonp(callback, { success: false, error: 'Settings sheet missing day/monthIndex/year columns' });
-    }
-
-    const current_date = {
-      day:        Number(row[dayCol]),
-      monthIndex: Number(row[monthIndexCol]),
-      year:       Number(row[yearCol])
-    };
-    return jsonp(callback, { success: true, current_date });
-
-  } catch (err) {
-    console.error('handleGetDate error:', err);
-    return jsonp(callback, { success: false, error: String(err) });
-  }
-}
-
-function handleSetDate(e, callback) {
-  try {
-    const raw = e.parameter.payload;
-    if (!raw) return jsonp(callback, { success: false, error: 'Missing payload' });
-    const payload = JSON.parse(raw);
-    const { day, monthIndex, year } = payload;
-
-    if (day === undefined || monthIndex === undefined || year === undefined) {
-      return jsonp(callback, { success: false, error: 'Payload must include day, monthIndex, and year' });
-    }
-
-    const spreadsheet = SpreadsheetApp.openById(SHEET_ID);
-    const sheet = spreadsheet.getSheetByName('Settings');
-    if (!sheet) return jsonp(callback, { success: false, error: 'Settings sheet not found' });
-
-    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0].map(h => String(h).trim().toLowerCase());
-    const dayCol        = headers.indexOf('day') + 1;        // 1-based
-    const monthIndexCol = headers.indexOf('monthindex') + 1;
-    const yearCol       = headers.indexOf('year') + 1;
-
-    if (!dayCol || !monthIndexCol || !yearCol) {
-      return jsonp(callback, { success: false, error: 'Settings sheet missing day/monthIndex/year columns' });
-    }
-
-    sheet.getRange(2, dayCol).setValue(day);
-    sheet.getRange(2, monthIndexCol).setValue(monthIndex);
-    sheet.getRange(2, yearCol).setValue(year);
-
-    console.log('Current date updated to:', day, monthIndex, year);
-    return jsonp(callback, { success: true });
-
-  } catch (err) {
-    console.error('handleSetDate error:', err);
-    return jsonp(callback, { success: false, error: String(err) });
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Sheet reader
-// ---------------------------------------------------------------------------
-function readSheet(name, filterVisible) {
-  const spreadsheet = SpreadsheetApp.openById(SHEET_ID);
-  const sheet = spreadsheet.getSheetByName(name);
-
-  if (!sheet) {
-    console.warn('Sheet not found:', name);
-    return [];
-  }
+function readSheet(name) {
+  const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(name);
+  if (!sheet) { console.warn('Sheet not found:', name); return []; }
 
   const range = sheet.getDataRange();
-  if (range.getNumRows() < 2) return []; // header only, no data
+  if (range.getNumRows() < 2) return [];
 
   const [headerRow, ...dataRows] = range.getValues();
-
-  // Normalise header names: trim whitespace and lowercase for safe comparison
   const headers = headerRow.map(h => String(h).trim().toLowerCase());
 
-  const rows = dataRows
-    .filter(row => row.some(cell => String(cell).length > 0)) // skip blank rows
+  return dataRows
+    .filter(row => row.some(cell => String(cell).length > 0))
     .map(row => {
       const obj = {};
-      headers.forEach((h, i) => {
-        obj[h] = row[i] !== undefined ? row[i] : '';
-      });
+      headers.forEach((h, i) => { obj[h] = row[i] !== undefined ? row[i] : ''; });
       return obj;
     });
-
-  if (!filterVisible) return rows;
-
-  // Filter out rows where the `visible` column is explicitly FALSE
-  // Also filter out rows where the `prepared` column is explicitly 'x' (not yet ready to show)
-  return rows.filter(row => {
-    const v = String(row.visible || '').trim().toUpperCase();
-    if (v === 'FALSE' || v === '0' || v === 'NO') return false;
-    const p = String(row.prepared || '').trim().toLowerCase();
-    if (p === 'x') return false;
-    return true;
-  });
 }
 
 // ---------------------------------------------------------------------------
-// Discord notification system
+// JSONP helper
 // ---------------------------------------------------------------------------
+function jsonp(callback, data) {
+  const safe = /^[a-zA-Z_$][a-zA-Z0-9_$.]*$/.test(callback) ? callback : 'callback';
+  return ContentService
+    .createTextOutput(`${safe}(${JSON.stringify(data)})`)
+    .setMimeType(ContentService.MimeType.JAVASCRIPT);
+}
 
-// Article (lore/compendium) sheets that trigger a Discord notification when a new entry is written
-const ARTICLE_SHEETS = [
-  'Nations', 'Species', 'Deities', 'History', 'Literature', 'Society', 'Technology',
-  'Characters', 'Factions', 'Bestiary', 'Items', 'Alchemy', 'Locations',
-];
-
-// Character columns on the Recaps sheet that hold IC journal entries
-const RECAP_CHARACTER_COLUMNS = ['ash', 'missy', 'salwyck', 'toby', 'zilrion'];
-
+// ---------------------------------------------------------------------------
+// Discord notifications
+// ---------------------------------------------------------------------------
 function toTitleCase(str) {
   return String(str || '').replace(/(?<!')\b\w/g, c => c.toUpperCase());
 }
@@ -386,147 +258,85 @@ function pick(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-// Builds an embed for a chapter recap — OOC title and summary teaser only.
+// New recap chapter posted (OOC)
 function buildRecapEmbed(rowData) {
-  const title  = String(rowData.title   || '').trim();
-  const body   = String(rowData.content || '').trim();
-  const teaser = body.length > 200 ? body.slice(0, 197) + '…' : body;
-  const url    = NEXUS_BASE_URL + '#breach/journal/recap/' + slugify(title);
+  const title   = String(rowData.title   || '').trim();
+  const chapter = String(rowData.chapter || '').trim();
+  const teaser  = (() => { const s = String(rowData.summary || '').trim(); return s.length > 200 ? s.slice(0, 197) + '...' : s; })();
+  const url     = JOURNAL_BASE_URL + '#journal/recap/' + slugify(title);
 
   return {
     title: title || 'New Recap',
     url,
     description: pick([
-      '📖 A new chapter has been posted!',
-      '📖 The story continues...',
-      '📖 A new chapter awaits.',
-      '📖 Turn the page.',
-      '📖 Another chapter is written.',
-    ]) + (teaser ? `\n> ${teaser}` : ''),
+      'A new chapter has been posted!',
+      'The story continues...',
+      'A new chapter awaits.',
+      'Turn the page.',
+      'Another chapter is written.',
+    ]) + (chapter ? '\n*' + chapter + '*' : '') + (teaser ? '\n> ' + teaser : ''),
     color: 0x5865F2,
     timestamp: new Date().toISOString(),
   };
 }
 
-// Builds an embed for an IC journal entry posted under a recap
+// IC journal entry posted by a character under a recap
 function buildIcEntryEmbed(rowData) {
   const character  = toTitleCase(rowData.character) || 'Someone';
   const charSlug   = String(rowData.character || '').toLowerCase().trim();
   const recapTitle = String(rowData.recap_title || '').trim();
   const entry      = String(rowData.entry || '').trim();
-  const teaser     = entry.length > 200 ? entry.slice(0, 197) + '…' : entry;
-  const teaserLine = teaser ? `\n> *"${teaser}"*` : '';
-  const url        = NEXUS_BASE_URL + '#breach/journal/recap/' + slugify(recapTitle) + (charSlug ? '/' + charSlug : '');
+  const teaser     = entry.length > 200 ? entry.slice(0, 197) + '...' : entry;
+  const url        = JOURNAL_BASE_URL + '#journal/recap/' + slugify(recapTitle) + (charSlug ? '/' + charSlug : '');
 
   return {
-    title: `${character}'s Journal — ${recapTitle || 'New Entry'}`,
+    title: character + "'s Journal \u2014 " + (recapTitle || 'New Entry'),
     url,
     description: pick([
-      `**${character}** just wrote about their day...`,
-      `**${character}** put quill to parchment...`,
-      `**${character}** adds another entry to their journal...`,
-      `**${character}** had something worth writing down...`,
-      `**${character}'s** journal gains another page...`,
-    ]) + teaserLine,
+      '**' + character + '** just wrote about their day...',
+      '**' + character + '** put quill to parchment...',
+      '**' + character + '** adds another entry to their journal...',
+      '**' + character + '** had something worth writing down...',
+      '**' + character + "'s** journal gains another page...",
+    ]) + (teaser ? '\n> *"' + teaser + '"*' : ''),
     color: 0x57F287,
     footer: recapTitle ? { text: recapTitle } : undefined,
     timestamp: new Date().toISOString(),
   };
 }
 
-// Builds an embed for a new comment on a recap
+// Comment posted on a recap
 function buildCommentEmbed(rowData) {
-  const commenter  = toTitleCase(rowData.author)    || 'Someone';
-  const recapOwner = toTitleCase(rowData.character) || 'someone';
-  const charSlug   = String(rowData.character || '').toLowerCase().trim();
+  const commenter  = toTitleCase(rowData.author) || 'Someone';
   const recapTitle = String(rowData.recap_title || 'a recap').trim();
-  const url        = NEXUS_BASE_URL + '#breach/journal/recap/' + slugify(recapTitle) + (charSlug ? '/' + charSlug : '');
+  const url        = JOURNAL_BASE_URL + '#journal/recap/' + slugify(recapTitle);
 
   return {
     title: recapTitle,
     url,
     description: pick([
-      `**${commenter}** just wrote on **${recapOwner}'s** recap *"${recapTitle}"*...`,
-      `**${commenter}** left their mark on **${recapOwner}'s** recap *"${recapTitle}"*...`,
-      `Something's been scrawled in the margins of **${recapOwner}'s** recap by **${commenter}**...`,
-      `**${commenter}** had something to say about **${recapOwner}'s** recap *"${recapTitle}"*...`,
-      `**${commenter}'s** handwriting fills the margins of *"${recapTitle}"*...`,
+      '**' + commenter + '** left a comment on *"' + recapTitle + '"*...',
+      '**' + commenter + '** had something to say about *"' + recapTitle + '"*...',
+      '**' + commenter + '** wrote on *"' + recapTitle + '"*...',
     ]),
-    color: 0xEB459E,
+    color: 0xFEE75C,
     timestamp: new Date().toISOString(),
   };
 }
 
-// Builds an embed for a newly created article (lore / compendium entry)
-function buildArticleEmbed(sheetName, rowData) {
-  const name    = String(rowData.name || '').trim();
-  const summary = String(rowData.summary || '').trim();
-  const teaser  = summary.length > 200 ? summary.slice(0, 197) + '…' : summary;
-  // Technology articles live in the Society panel on the frontend
-  const panelName = sheetName === 'Technology' ? 'society' : sheetName.toLowerCase();
-  const url = NEXUS_BASE_URL + '#breach/' + panelName + (name ? '/' + slugify(name) : '');
+function notifyDiscord(type, rowData) {
+  if (!DISCORD_WEBHOOK_URL || DISCORD_WEBHOOK_URL.startsWith('REPLACE')) return;
 
-  return {
-    title: name || 'New ' + sheetName + ' Entry',
-    url,
-    description: pick([
-      `📜 A new **${sheetName}** entry has been added to the Nexus!`,
-      `📜 The compendium grows — a new **${sheetName}** article has been written.`,
-      `📜 Lore expands: a new entry appears under **${sheetName}**.`,
-      `📜 Something new has been catalogued in **${sheetName}**.`,
-      `📜 New knowledge added to **${sheetName}**.`,
-    ]) + (teaser ? `\n> ${teaser}` : ''),
-    color: 0xFAA61A,
-    footer: { text: sheetName },
-    timestamp: new Date().toISOString(),
-  };
+  let embed;
+  if (type === 'Recaps')   embed = buildRecapEmbed(rowData);
+  if (type === 'RecapIC')  embed = buildIcEntryEmbed(rowData);
+  if (type === 'Comments') embed = buildCommentEmbed(rowData);
+  if (!embed) return;
+
+  UrlFetchApp.fetch(DISCORD_WEBHOOK_URL, {
+    method: 'post',
+    contentType: 'application/json',
+    payload: JSON.stringify({ embeds: [embed] }),
+    muteHttpExceptions: true,
+  });
 }
-
-// Dispatches to the correct embed builder and sends the webhook
-function notifyDiscord(sheetName, rowData) {
-  try {
-    let embed;
-
-    if (sheetName === 'Recaps') {
-      embed = buildRecapEmbed(rowData);
-    } else if (sheetName === 'RecapIC') {
-      embed = buildIcEntryEmbed(rowData);
-    } else if (sheetName === 'Comments') {
-      embed = buildCommentEmbed(rowData);
-    } else if (ARTICLE_SHEETS.includes(sheetName)) {
-      embed = buildArticleEmbed(sheetName, rowData);
-    } else {
-      return;
-    }
-
-    const body = JSON.stringify({ embeds: [embed] });
-    const response = UrlFetchApp.fetch(DISCORD_WEBHOOK_URL, {
-      method:      'post',
-      contentType: 'application/json',
-      payload:     body,
-      muteHttpExceptions: true,
-    });
-
-    const status = response.getResponseCode();
-    if (status === 204) {
-      console.log(`notifyDiscord: sent successfully for ${sheetName}`);
-    } else {
-      console.warn(`notifyDiscord: HTTP ${status} for ${sheetName} — ${response.getContentText()}`);
-    }
-  } catch (err) {
-    console.error(`notifyDiscord: failed for ${sheetName}:`, err);
-  }
-}
-
-// ---------------------------------------------------------------------------
-// JSONP helper — wraps payload in callback(…); so the browser can receive it
-// without CORS issues
-// ---------------------------------------------------------------------------
-function jsonp(callbackName, data) {
-  const safe = callbackName.replace(/[^a-zA-Z0-9_$.]/g, '_'); // sanitise callback name
-  const payload = safe + '(' + JSON.stringify(data) + ');';
-  return ContentService
-    .createTextOutput(payload)
-    .setMimeType(ContentService.MimeType.JAVASCRIPT);
-}
-
