@@ -1,7 +1,7 @@
 // config.js - Single source of truth for all configuration
 const Config = {
   // Backend — Google Apps Script web app URL (replace with new deployment URL)
-  APPS_SCRIPT_URL: 'REPLACE_WITH_NEW_APPS_SCRIPT_URL',
+  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwn-r23lvPAtdoHvnvtFMXbSAbFn-tMvst4PwfAMf8B3UL2svoxtRKYz7Cu-4P3G90p-g/exec',
 
   // Sheet names in the workbook
   SHEETS: {
