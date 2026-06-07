@@ -1,6 +1,6 @@
 /* breach-theme.css: Cinzel is already loaded by base.css — no second import needed */
 
-body.world-breach {
+body {
     /* Breach Theme Variables - UPDATED to Purple */
     --primary-bg: linear-gradient(135deg, #1a0f1e, #2c2038, #3d3456, #4a3f5c);
     /* Fallback background for browsers that don't support :has() (e.g. older Safari) */
@@ -38,7 +38,7 @@ body.world-breach {
 }
 
 /* Remove blurred image background layer */
-body.world-breach::before {
+body::before {
     /* ...remove image background... */
     content: none;
 }
@@ -55,83 +55,83 @@ body.world-breach::before {
 
 /* Breach-specific styling */
 
-body.world-breach h1 {
+body h1 {
     background: linear-gradient(45deg, #b19cd9, #c9b5e6);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
 }
 
-body.world-breach h2 {
+body h2 {
     font-family: var(--font-ui);
     color: #b19cd9;
     text-transform: uppercase;
     letter-spacing: 2px;
 }
 
-body.world-breach .world-card:hover {
+body .world-card:hover {
     border-color: #b19cd9;
     box-shadow: 0 10px 25px rgba(177, 156, 217, 0.3);
 }
 
 
 /* Remove lower gradient for Breach article cards */
-body.world-breach .article-card .card-overlay {
+body .article-card .card-overlay {
     background: none !important;
 }
 
 /* Light text for better readability */
-body.world-breach .article-card .card-title,
-body.world-breach .article-card .card-summary {
+body .article-card .card-title,
+body .article-card .card-summary {
     color: #ffffff !important; /* Changed from #fff8f0 to pure white */
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.9) !important; /* Darker shadow, no color tint */
 }
 
 /* Reduce fantasy glows for article cards */
-body.world-breach .article-card.tag-operator {
+body .article-card.tag-operator {
     box-shadow: 0 0 8px var(--card-glow-operator), 0 4px 12px rgba(191, 167, 122, 0.15);
 }
 
-body.world-breach .article-card.tag-operator:hover {
+body .article-card.tag-operator:hover {
     box-shadow: 0 0 12px var(--card-glow-operator), 0 8px 16px rgba(191, 167, 122, 0.2);
 }
 
-body.world-breach .article-card.tag-handler {
+body .article-card.tag-handler {
     box-shadow: 0 0 8px var(--card-glow-handler), 0 4px 12px rgba(191, 167, 122, 0.15);
 }
 
-body.world-breach .article-card.tag-handler:hover {
+body .article-card.tag-handler:hover {
     box-shadow: 0 0 12px var(--card-glow-handler), 0 8px 16px rgba(191, 167, 122, 0.2);
 }
 
-body.world-breach .article-card.tag-broker {
+body .article-card.tag-broker {
     box-shadow: 0 0 8px var(--card-glow-broker), 0 4px 12px rgba(191, 167, 122, 0.15);
 }
 
-body.world-breach .article-card.tag-broker:hover {
+body .article-card.tag-broker:hover {
     box-shadow: 0 0 12px var(--card-glow-broker), 0 8px 16px rgba(191, 167, 122, 0.2);
 }
 
-body.world-breach .article-card:not(.tag-operator):not(.tag-handler):not(.tag-broker) {
+body .article-card:not(.tag-operator):not(.tag-handler):not(.tag-broker) {
     box-shadow: 0 0 8px var(--card-glow-default), 0 4px 12px rgba(191, 167, 122, 0.12);
 }
 
-body.world-breach .clear-btn {
+body .clear-btn {
     background: rgba(177, 156, 217, 0.25) !important;
     color: #e8e8e8 !important;
     border: 1px solid rgba(177, 156, 217, 0.5) !important;
 }
 
-body.world-breach .clear-btn:hover {
+body .clear-btn:hover {
     background: rgba(177, 156, 217, 0.4) !important;
     border-color: #b19cd9 !important;
     color: #ffffff !important;
 }
 
 /* Typography overrides */
-body.world-breach h2,
-body.world-breach h3,
-body.world-breach h4 {
+body h2,
+body h3,
+body h4 {
     font-family: var(--font-ui);
 }
 
@@ -143,7 +143,7 @@ body.world-breach h4 {
     padding: 15px 20px !important; /* Match the reduced padding */
 }
 
-body.world-breach .article-modal .modal-header h2 {
+body .article-modal .modal-header h2 {
     color: #b19cd9 !important;
     font-family: var(--font-ui) !important;
     font-weight: 900 !important;
@@ -152,31 +152,31 @@ body.world-breach .article-modal .modal-header h2 {
                  0 2px 4px rgba(0, 0, 0, 0.8) !important; /* Drop shadow */
 }
 
-body.world-breach .article-modal .modal-body {
+body .article-modal .modal-body {
     color: #ffffff !important;
     scrollbar-width: none !important;
     -ms-overflow-style: none !important;
     font-family: var(--font-body) !important; /* Use Faculty Glyphic for body text */
 }
 
-body.world-breach .article-modal .modal-body::-webkit-scrollbar {
+body .article-modal .modal-body::-webkit-scrollbar {
     width: 0 !important;
     display: none !important;
 }
 
-body.world-breach .article-modal .modal-body h1,
-body.world-breach .article-modal .modal-body h2,
-body.world-breach .article-modal .modal-body h3 {
+body .article-modal .modal-body h1,
+body .article-modal .modal-body h2,
+body .article-modal .modal-body h3 {
     color: #b19cd9 !important;
     letter-spacing: normal !important;
 }
 
-body.world-breach .article-modal .modal-body p {
+body .article-modal .modal-body p {
     color: #ffffff !important;
     font-family: var(--font-body) !important; /* Use Faculty Glyphic for paragraphs */
 }
 
-body.world-breach .article-modal .article-modal-summary {
+body .article-modal .article-modal-summary {
     color: #ffffff !important;
     background: rgba(177, 156, 217, 0.08) !important;
     border-left: 3px solid #b19cd9 !important;
@@ -185,13 +185,13 @@ body.world-breach .article-modal .article-modal-summary {
 }
 
 /* Breach: remove borders on article preview cards only in this theme */
-body.world-breach .article-card {
+body .article-card {
     border: none !important;
     border-radius: 0 !important;
 }
 
 /* Replace Nexus logo with Breach logo when Breach world is active */
-body.world-breach .logo {
+body .logo {
     content: url("assets/Breach-logo.png");
     /* Keep same dimensions as Nexus logo */
     height: 80px;
@@ -199,7 +199,7 @@ body.world-breach .logo {
 }
 
 /* ========== QUEST SYSTEM OVERRIDES ========== */
-body.world-breach .quest-detail-title {
+body .quest-detail-title {
   color: #b19cd9 !important;
   font-family: var(--font-ui) !important;
   font-weight: 900 !important;
@@ -210,7 +210,7 @@ body.world-breach .quest-detail-title {
   background-clip: initial !important;
 }
 
-body.world-breach .quest-detail-tag {
+body .quest-detail-tag {
   font-family: var(--font-ui) !important;
   color: #c9b5e6 !important;
   background: rgba(201, 181, 230, 0.25) !important;

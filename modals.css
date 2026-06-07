@@ -1475,7 +1475,7 @@ body.modal-active main {
     letter-spacing: normal;
 }
 
-body.world-breach .recap-title {
+body .recap-title {
     color: #fff8f0 !important;
     font-family: 'Patrick Hand SC', cursive !important;
     text-transform: none !important;

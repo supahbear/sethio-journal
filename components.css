@@ -550,7 +550,7 @@
 }
 
 /* Breach edit: bigger font size on buttons */
-body.world-breach .explore-primary-btn {
+body .explore-primary-btn {
     font-size: 1.4rem;
     font-weight: var(--font-weight-heavy);
 }
