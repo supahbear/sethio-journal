@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS - TTRPG World Hub</title>
+    
+    <!-- CSS files in load order: foundation → components → content → overrides -->
+    <link href="base.css" rel="stylesheet" type="text/css" />
+    <link href="components.css" rel="stylesheet" type="text/css" />
+    <link href="cards.css" rel="stylesheet" type="text/css" />
+    <link href="features.css" rel="stylesheet" type="text/css" />
+    <link href="modals.css" rel="stylesheet" type="text/css" />
+    <link href="utilities.css" rel="stylesheet" type="text/css" />
+    <link href="responsive.css" rel="stylesheet" type="text/css" />
+    
+    <!-- Breach theme (single world) -->
+    <link href="breach-theme.css" rel="stylesheet" type="text/css" />
+
+    <!-- Handwriting font for margin notes -->
+    <link href="https://fonts.googleapis.com/css2?family=Indie+Flower&display=swap" rel="stylesheet" />
+</head>
+<body>
+    <!-- Background video layer for world selection -->
+    <div id="worldBackgroundLayer" class="world-background-layer">
+        <video id="bgVideo-neutral" class="world-bg-video active" autoplay muted loop playsinline>
+            <source src="assets/videos/neutral-landing.mp4" type="video/mp4">
+        </video>
+        <video id="bgVideo-breach" class="world-bg-video" muted loop playsinline>
+            <source src="assets/videos/Breach-vid.mp4" type="video/mp4">
+        </video>
+    </div>
+
+    <div class="container">
+        <header>
+            <div class="logo-container" onclick="window.location.reload()">
+                <img src="assets/breach-logo.png" alt="The Breach" class="logo" />
+                <h1 class="logo-fallback">The Breach</h1>
+            </div>
+        </header>
+
+        <main>
+            <section class="landing-screen">
+                <h2>Tales from the Breach</h2>
+                <div class="worlds-grid" id="worldsGrid">
+                    <div class="world-card loading" data-loading="true" data-world-id="breach">
+                        <video class="world-video" muted loop playsinline autoplay>
+                            <source src="assets/videos/breach-loopv2.mp4" type="video/mp4">
+                        </video>
+                        <div class="world-name">Loading</div>
+                        <div class="world-description">Loading world...</div>
+                        <div class="world-overlay"></div>
+                    </div>
+                </div>
+                
+                <div class="landing-message">
+                    <div class="message-content" id="landingMessage">
+                        Welcome to the Nexus, a place intended as a multi-campaign hub within the same universe.<br>❤️Enjoy❤️
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== WORLD HUB ===== -->
+            <section class="world-hub" id="worldHub" style="display: none;">
+
+                <!-- Sticky header bar -->
+                <div class="hub-header" id="hubHeader">
+                    <div class="hub-header-start"></div>
+                    <div class="hub-header-center" id="hubHeaderCenter">
+                        <img src="assets/breach-logo.png" alt="The Breach" class="hub-center-logo" id="hubTitleText" />
+                        <div class="hub-panel-nav" id="hubPanelNav" style="display:none;">
+                            <button class="hub-back-btn" id="hubBackBtn">← Hub</button>
+                            <span class="hub-panel-nav-title" id="hubActivePanelTitle"></span>
+                        </div>
+                    </div>
+                    <div class="hub-header-end">
+                        <button class="hub-action-btn" id="galleryBtn">Gallery</button>
+                        <button class="hub-action-btn" id="journalBtn">Journal</button>
+                        <button class="hub-action-btn" id="calendarBtn">Calendar</button>
+                        <button class="hub-action-btn" id="inventoryBtn">Inventory</button>
+                    </div>
+                </div>
+
+                <!-- Main scrollable area -->
+                <div class="hub-main-area" id="hubMainArea">
+
+                    <!-- ── Hub selection grid (shown when no panel active) ── -->
+                    <div class="hub-selection" id="hubSelection">
+
+                        <div class="hub-section">
+                            <div class="hub-section-header">
+                                <div class="hub-section-line"></div>
+                                <span class="hub-section-label">Compendium</span>
+                                <div class="hub-section-line"></div>
+                            </div>
+                            <div class="hub-tiles-row">
+                                <div class="hub-tile" data-panel="alchemy">
+                                    <span class="tile-name">Alchemy</span>
+                                    <span class="tile-sub">flora · ingredients · potions</span>
+                                </div>
+                                <div class="hub-tile" data-panel="bestiary">
+                                    <span class="tile-name">Bestiary</span>
+                                    <span class="tile-sub">creatures · monsters</span>
+                                </div>
+                                <div class="hub-tile" data-panel="characters">
+                                    <span class="tile-name">Characters</span>
+                                    <span class="tile-sub">leaders · allies · enemies</span>
+                                </div>
+                                <div class="hub-tile" data-panel="items">
+                                    <span class="tile-name">Items</span>
+                                    <span class="tile-sub">gear · artifacts · objects</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="hub-section">
+                            <div class="hub-section-header">
+                                <div class="hub-section-line"></div>
+                                <span class="hub-section-label">World</span>
+                                <div class="hub-section-line"></div>
+                            </div>
+                            <div class="hub-tiles-row">
+                                <div class="hub-tile" data-panel="deities">
+                                    <span class="tile-name">Deities</span>
+                                    <span class="tile-sub">empyreans · entities</span>
+                                </div>
+                                <div class="hub-tile" data-panel="factions">
+                                    <span class="tile-name">Factions</span>
+                                    <span class="tile-sub">orgs · guilds · houses</span>
+                                </div>
+                                <div class="hub-tile" data-panel="history">
+                                    <span class="tile-name">History</span>
+                                    <span class="tile-sub">eras · events · timeline</span>
+                                </div>
+                                <div class="hub-tile" data-panel="calendar">
+                                    <span class="tile-name">Calendar</span>
+                                    <span class="tile-sub">events · dates · chronicle</span>
+                                </div>
+                                <div class="hub-tile" data-panel="literature">
+                                    <span class="tile-name">Literature</span>
+                                    <span class="tile-sub">books · prose · legends</span>
+                                </div>
+                                <div class="hub-tile" data-panel="locations">
+                                    <span class="tile-name">Locations</span>
+                                    <span class="tile-sub">cities · landmarks · regions</span>
+                                </div>
+                                <div class="hub-tile" data-panel="nations">
+                                    <span class="tile-name">Nations</span>
+                                    <span class="tile-sub">demographic · heraldry</span>
+                                </div>
+                                <div class="hub-tile" data-panel="society">
+                                    <span class="tile-name">Society</span>
+                                    <span class="tile-sub">culture · expression · technology</span>
+                                </div>
+                                <div class="hub-tile" data-panel="species">
+                                    <span class="tile-name">Species</span>
+                                    <span class="tile-sub">origin · nature · homeland</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div><!-- /.hub-selection -->
+
+                    <!-- ── Panel content area (shown when a tile is selected) ── -->
+                    <div class="hub-content-area" id="hubContentArea" style="display:none;">
+                        <div class="panel-content" id="nationsContent"></div>
+                        <div class="panel-content" id="speciesContent"></div>
+                        <div class="panel-content" id="deitiesContent"></div>
+                        <div class="panel-content" id="historyContent"></div>
+                        <div class="panel-content" id="literatureContent"></div>
+                        <div class="panel-content" id="societyContent"></div>
+                        <div class="panel-content" id="charactersContent"></div>
+                        <div class="panel-content" id="factionsContent"></div>
+                        <div class="panel-content" id="bestiaryContent"></div>
+                        <div class="panel-content" id="itemsContent"></div>
+                        <div class="panel-content" id="alchemyContent"></div>
+                        <div class="panel-content" id="locationsContent"></div>
+                        <div class="panel-content" id="calendarContent"></div>
+                    </div><!-- /.hub-content-area -->
+
+                </div><!-- /.hub-main-area -->
+
+            </section><!-- /.world-hub -->
+        </main>
+    </div>
+
+    <!-- ===== JOURNAL MODAL ===== -->
+    <div id="journalModalOverlay" class="modal-overlay">
+        <div class="journal-modal" id="journalModal">
+            <div class="journal-modal-content">
+                <div class="modal-header journal-modal-header">
+                    <div class="journal-tab-bar">
+                        <button class="journal-tab active" data-tab="campaign-log">Campaign Log</button>
+                        <button class="journal-tab" data-tab="leads">Leads</button>
+                    </div>
+                    <button class="close-btn" id="closeJournalBtn">&times;</button>
+                </div>
+                <div class="journal-tab-panels">
+                    <div class="journal-tab-panel active" id="journalTabCampaignLog"></div>
+                    <div class="journal-tab-panel" id="journalTabLeads"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== CALENDAR MODAL ===== -->
+    <div id="calendarModalOverlay" class="modal-overlay">
+        <div class="calendar-modal" id="calendarModal">
+            <div class="calendar-modal-content">
+                <div class="modal-header">
+                    <h2>Calendar</h2>
+                    <button class="close-btn" id="closeCalendarBtn">&times;</button>
+                </div>
+                <div class="calendar-modal-body" id="calendarModalBody"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ARTICLE MODAL ===== -->
+    <div id="modalOverlay" class="modal-overlay">
+        <div class="article-modal" id="articleModal">
+            <div class="modal-content">
+                <button class="close-btn" id="closeModalBtn">&times;</button>
+                <button class="edit-btn" id="editArticleBtn" title="Edit article">&#9998;</button>
+                <div class="modal-header">
+                    <h2 id="modalTitle">Article Title</h2>
+                </div>
+                <div class="modal-body" id="modalBody"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== INVENTORY MODAL ===== -->
+    <div id="inventoryModalOverlay" class="modal-overlay">
+        <div class="inventory-modal" id="inventoryModal">
+            <div class="inventory-modal-content">
+                <div class="modal-header inventory-modal-header">
+                    <h2>Party Inventory</h2>
+                    <div class="inventory-fund-display" id="inventoryFundDisplay">
+                        <span class="fund-label">Party Fund</span>
+                        <span class="fund-value" id="fundDrakonsDisplay"><span class="fund-coin fund-drakon">◈</span><span id="fundDrakonsAmt">0</span> drakons</span>
+                        <span class="fund-sep">·</span>
+                        <span class="fund-value" id="fundScalesDisplay"><span class="fund-coin fund-scale">⊙</span><span id="fundScalesAmt">0</span> scales</span>
+                        <button class="fund-edit-btn" id="fundEditBtn" title="Edit party fund">&#9998;</button>
+                    </div>
+                    <button class="inv-add-btn" id="inventoryAddBtn">+ Add Item</button>
+                    <button class="close-btn" id="closeInventoryBtn">&times;</button>
+                </div>
+                <!-- Fund editor (inline, hidden by default) -->
+                <div class="fund-editor" id="fundEditor" style="display:none;">
+                    <label class="fund-editor-label">Edit Party Fund</label>
+                    <div class="fund-editor-fields">
+                        <div class="fund-field">
+                            <span class="fund-coin fund-drakon">◈</span>
+                            <input type="number" id="fundDrakonsInput" class="fund-input" min="0" placeholder="0">
+                            <span class="fund-denom">drakons</span>
+                        </div>
+                        <div class="fund-field">
+                            <span class="fund-coin fund-scale">⊙</span>
+                            <input type="number" id="fundScalesInput" class="fund-input" min="0" placeholder="0">
+                            <span class="fund-denom">scales</span>
+                        </div>
+                    </div>
+                    <div class="fund-editor-actions">
+                        <button class="inv-btn inv-btn-save" id="fundSaveBtn">Save</button>
+                        <button class="inv-btn inv-btn-cancel" id="fundCancelBtn">Cancel</button>
+                        <span class="fund-save-status" id="fundSaveStatus"></span>
+                    </div>
+                </div>
+                <!-- Character slot filter -->
+                <div class="inventory-char-filter" id="inventoryCharFilter"></div>
+                <!-- Category filter tabs -->
+                <div class="inventory-tabs" id="inventoryTabs">
+                    <button class="inv-tab active" data-category="all">All</button>
+                    <button class="inv-tab" data-category="General">General</button>
+                    <button class="inv-tab" data-category="Armor">Armor</button>
+                    <button class="inv-tab" data-category="Weapons">Weapons</button>
+                    <button class="inv-tab" data-category="Magic Items">Magic Items</button>
+                    <button class="inv-tab" data-category="Jewelry">Jewelry</button>
+                </div>
+                <!-- Add / Edit form (hidden by default) -->
+                <div class="inventory-form-row" id="inventoryFormRow" style="display:none;">
+                    <input type="text" class="inv-input" id="invFormCharacter" placeholder="Character name" list="invCharacterList" autocomplete="off">
+                    <datalist id="invCharacterList"></datalist>
+                    <input type="text" class="inv-input inv-input-wide" id="invFormName" placeholder="Item name">
+                    <select class="inv-input" id="invFormCategory">
+                        <option value="General">General</option>
+                        <option value="Armor">Armor</option>
+                        <option value="Weapons">Weapons</option>
+                        <option value="Magic Items">Magic Items</option>
+                        <option value="Jewelry">Jewelry</option>
+                    </select>
+                    <input type="number" class="inv-input inv-input-qty" id="invFormQty" min="1" value="1" placeholder="Qty">
+                    <input type="text" class="inv-input inv-input-wide" id="invFormNotes" placeholder="Notes (optional)">
+                    <button class="inv-btn inv-btn-save" id="invFormSaveBtn">Save</button>
+                    <button class="inv-btn inv-btn-cancel" id="invFormCancelBtn">Cancel</button>
+                    <span class="inv-form-status" id="invFormStatus"></span>
+                </div>
+                <!-- Inventory table -->
+                <div class="inventory-body" id="inventoryBody">
+                    <div class="inventory-loading" id="inventoryLoadingMsg">Loading inventory…</div>
+                    <table class="inventory-table" id="inventoryTable" style="display:none;">
+                        <thead>
+                            <tr>
+                                <th class="inv-col-char">Character</th>
+                                <th class="inv-col-name">Item</th>
+                                <th class="inv-col-cat">Category</th>
+                                <th class="inv-col-qty">Qty</th>
+                                <th class="inv-col-notes">Notes</th>
+                                <th class="inv-col-actions"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventoryTableBody"></tbody>
+                    </table>
+                    <div class="inventory-empty" id="inventoryEmptyMsg" style="display:none;">No items found. Add one above!</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== GALLERY MODAL ===== -->
+    <div id="galleryModalOverlay" class="modal-overlay">
+        <div class="gallery-modal" id="galleryModal">
+            <div class="gallery-modal-content">
+                <div class="modal-header gallery-modal-header">
+                    <h2>Gallery</h2>
+                    <button class="gallery-add-btn" id="galleryAddBtn">+ Add Image</button>
+                    <button class="close-btn" id="closeGalleryBtn">&times;</button>
+                </div>
+                <!-- Add / Edit form (hidden by default) -->
+                <div class="gallery-form-area" id="galleryFormArea" style="display:none;">
+                    <div class="gallery-form-row-fields">
+                        <input type="url" class="gallery-input gallery-input-url" id="galleryFormUrl" placeholder="Image URL" autocomplete="off">
+                        <input type="text" class="gallery-input gallery-input-title" id="galleryFormTitle" placeholder="Title">
+                        <input type="text" class="gallery-input gallery-input-artist" id="galleryFormArtist" placeholder="Artist (optional)">
+                        <textarea class="gallery-input gallery-textarea" id="galleryFormDescription" placeholder="Description (optional)"></textarea>
+                    </div>
+                    <div class="gallery-form-actions">
+                        <button class="gallery-btn gallery-btn-save" id="galleryFormSaveBtn">Save</button>
+                        <button class="gallery-btn gallery-btn-cancel" id="galleryFormCancelBtn">Cancel</button>
+                        <span class="gallery-form-status" id="galleryFormStatus"></span>
+                    </div>
+                </div>
+                <!-- Gallery grid -->
+                <div class="gallery-body" id="galleryBody">
+                    <div class="gallery-loading" id="galleryLoadingMsg">Loading gallery…</div>
+                    <div class="gallery-grid" id="galleryGrid" style="display:none;"></div>
+                    <div class="gallery-empty" id="galleryEmptyMsg" style="display:none;">No images yet. Add one above!</div>
+                </div>
+                <!-- Lightbox layer (covers the modal when an image is clicked) -->
+                <div class="gallery-lightbox" id="galleryLightbox" style="display:none;">
+                    <button class="gallery-lightbox-back" id="galleryLightboxBack">← Back</button>
+                    <button class="gallery-lightbox-edit" id="galleryLightboxEdit" title="Edit">&#9998;</button>
+                    <button class="gallery-lightbox-delete" id="galleryLightboxDelete" title="Delete">&times;</button>
+                    <img class="gallery-lightbox-img" id="galleryLightboxImg" src="" alt="">
+                    <div class="gallery-lightbox-info" id="galleryLightboxInfo"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript files -->
+    <script src="config.js?v=7"></script>
+    <script src="script.js?v=7"></script>
+    <script src="article_viewer.js?v=7"></script>
+    <script src="quest_viewer.js?v=7"></script>
+    <script src="atlas_viewer.js?v=7"></script>
+</body>
+</html>

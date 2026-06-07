@@ -1,0 +1,1 @@
+directory used for hosting images. 100 gb limit (?)

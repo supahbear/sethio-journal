@@ -1,0 +1,177 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Fjalla+One:wght@400&family=Faculty+Glyphic&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Patrick+Hand+SC&family=La+Belle+Aurore&display=swap');
+
+/* ========== CSS VARIABLES ========== */
+:root {
+    /* Color scheme */
+    --primary-bg: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    --secondary-bg: rgba(255, 255, 255, 0.7);
+    --card-bg: #ffffff;
+    --text-color: #2c3e50;
+    --text-secondary: #7f8c8d;
+    --text-accent: #34495e;
+    --border-color: rgba(52, 73, 94, 0.2);
+    --button-bg: rgba(255, 255, 255, 0.8);
+    --button-hover: rgba(255, 255, 255, 0.9);
+    
+    /* Typography — base (non-themed) defaults */
+    --font-family: Arial, sans-serif;
+    --font-weight-normal: 400;
+    --font-weight-bold: 700;
+    --font-weight-heavy: 900;
+
+    /* Semantic font roles — override these per theme */
+    --font-ui:        'Cinzel', serif; /* nav, labels, badges, buttons */
+    --font-body:      Arial, sans-serif;         /* article/modal body text */
+    --font-editorial: Arial, sans-serif;         /* in-article headings (h2/h3) */
+    
+    /* Card system colors - purple theme */
+    --card-border-operator: #b19cd9;
+    --card-glow-operator: rgba(177, 156, 217, 0.5);
+    --card-border-handler: #c9b5e6;
+    --card-glow-handler: rgba(201, 181, 230, 0.5);
+    --card-border-broker: #9d87c7;
+    --card-glow-broker: rgba(157, 135, 199, 0.5);
+    --card-border-default: rgba(177, 156, 217, 0.3);
+    --card-glow-default: rgba(177, 156, 217, 0.2);
+    --card-overlay-gradient: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%);
+    
+    /* Modal system */
+    --modal-bg: #ffffff;
+    --modal-border: #cccccc;
+    --modal-overlay: rgba(0,0,0,0.5);
+    
+    /* Tour system - purple theme */
+    --tour-accent: #b19cd9;
+    --tour-bg: rgba(44, 44, 62, 0.9);
+    --tour-card-bg: rgba(177, 156, 217, 0.1);
+    --tour-nav-bg: #b19cd9;
+    --tour-nav-text: #2c2c3e;
+    --tour-dot-inactive: rgba(177, 156, 217, 0.3);
+    --tour-slide-bg: #2c2c3e;
+}
+
+/* ========== BASE STYLES ========== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-family);
+    background: transparent;
+    color: var(--text-color);
+    min-height: 100vh;
+    transition: background 1.5s ease;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+    position: relative;
+}
+
+/* When world-hub is active, prevent body scrolling */
+body:has(.world-hub:not([style*="display: none"])),
+body.hub-active {
+    overflow: hidden;
+}
+
+/* Hide background video layer in hub — replaced by dark gradient */
+body:has(.world-hub:not([style*="display: none"])) .world-background-layer,
+body.hub-active .world-background-layer {
+    opacity: 0;
+    transition: opacity 0.8s ease;
+}
+
+/* Dark gradient background for hub */
+body:has(.world-hub:not([style*="display: none"])),
+body.hub-active {
+    background: linear-gradient(160deg, #0d0a12 0%, #1a1028 40%, #0f0c18 100%);
+}
+
+/* Hide landing screen when world-hub is visible */
+body:has(.world-hub:not([style*="display: none"])) .landing-screen,
+body.hub-active .landing-screen {
+    display: none;
+}
+
+/* Hide container header when world-hub is visible */
+body:has(.world-hub:not([style*="display: none"])) > .container > header,
+body.hub-active > .container > header {
+    display: none;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    transition: opacity 0.5s ease;
+    background: transparent;
+}
+
+/* ========== HEADER & LOGO ========== */
+header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.logo-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.logo-container:hover {
+    transform: scale(1.05);
+}
+
+.logo {
+    height: 80px;
+    width: auto;
+    display: block;
+    transition: all 0.3s ease;
+}
+
+.logo-fallback {
+    font-family: var(--font-family);
+    font-weight: var(--font-weight-heavy);
+    font-size: 3rem;
+    margin: 0;
+    color: var(--text-accent);
+    display: none;
+}
+
+/* Show fallback if logo fails */
+.logo-container .logo[src=""] + .logo-fallback,
+.logo-container .logo:not([src]) + .logo-fallback {
+    display: block;
+}
+
+h1 {
+    font-family: var(--font-family);
+    font-weight: var(--font-weight-heavy);
+    font-size: 3rem;
+    margin-bottom: 10px;
+    color: var(--text-accent);
+}
+
+h2 {
+    font-family: var(--font-ui) !important; 
+    font-weight: 400;
+    font-size: 2.5rem;
+    margin-bottom: 30px;
+    text-align: center;
+    color: #ffffff; /* Changed from var(--text-accent) to white */
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-shadow: 0 3px 8px rgba(0, 0, 0, 0.9); /* NEW: strong drop shadow for readability */
+}
+
+.subtitle {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    font-weight: var(--font-weight-normal);
+}

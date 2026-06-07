@@ -1,0 +1,447 @@
+/*
+ * CARDS.CSS
+ * All card-based preview UI elements: world selection cards and article grid cards
+ * Contains world cards (cinematic video previews), article cards (content previews), and tag-based styling
+ * Depends on: base.css variables
+ */
+
+/* ========== WORLD BACKGROUND VIDEOS ========== */
+.world-background-layer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1; /* behind .container but visible if body bg is transparent */
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.world-bg-video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+    filter: blur(2px) brightness(0.6); /* Reduced from blur(4px) */
+}
+
+.world-bg-video.active {
+    opacity: 1;
+}
+
+/* ========== WORLD HUB ENTRY ANIMATION ========== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+#worldHub.entering {
+    animation: fadeIn 0.6s ease-out;
+}
+
+#worldHub.entering > * {
+    animation: fadeIn 0.6s ease-out backwards;
+}
+
+#worldHub.entering > header {
+    animation-delay: 0.1s;
+}
+
+#worldHub.entering > .hub-collapsed-header {
+    animation-delay: 0.2s;
+}
+
+/* ========== PANEL BACKGROUND VIDEOS ========== */
+.panel-bg-video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
+    opacity: 1;
+    z-index: 0;
+}
+
+/* ========== WORLD CARDS ========== */
+.worlds-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+    margin-bottom: 20px;
+    max-width: 1600px;      /* Added: cap grid width for wide screens */
+    margin-left: auto;      /* Center grid horizontally */
+    margin-right: auto;
+}
+
+.world-card {
+    position: relative;
+    height: 350px;
+    border-radius: 15px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 4px solid var(--border-color);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5); /* Increased from 0.2 to 0.5 */
+    
+    /* ADD: Force hardware acceleration */
+    will-change: opacity, transform;
+    transform: translateZ(0); /* Force GPU rendering */
+}
+
+/* Stagger text fade-in for each card */
+.world-card:nth-child(1) .world-name { animation-delay: 0s; }
+.world-card:nth-child(2) .world-name { animation-delay: 0.15s; }
+.world-card:nth-child(3) .world-name { animation-delay: 0.3s; }
+.world-card:nth-child(4) .world-name { animation-delay: 0.45s; }
+
+@keyframes textFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.world-card:hover {
+    transform: translateY(-6px) scale(1.02) translateZ(0); /* Keep GPU rendering */
+    border-color: var(--text-accent);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6), 
+                inset 0 0 30px rgba(255, 255, 255, 0.1); /* ADD: inner glow */
+    will-change: transform; /* Hint browser about hover transforms */
+}
+
+.world-card.loading {
+    cursor: default;
+    pointer-events: none;
+    opacity: 1;
+    visibility: visible;
+    animation: none !important;
+}
+
+.world-card.loading .world-card-video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 1;
+    filter: brightness(0.6);
+}
+
+.world-card.loading .world-name {
+    color: #ffffff;
+    text-transform: uppercase;
+    font-weight: 900;
+    font-size: 2.2rem;
+    font-family: 'Fjalla One', sans-serif;
+    animation: textFadeIn 1.2s ease-out forwards;
+}
+
+.world-card.loading .world-overlay {
+    opacity: 1;
+}
+
+.world-card.loading .world-description {
+    opacity: 1;
+    animation: none;
+}
+
+.world-video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 1;
+    transition: transform 0.3s ease;
+    /* ADD: Prevent video from triggering repaints during card animation */
+    will-change: transform;
+    transform: translateZ(0);
+}
+
+.world-card:hover .world-video {
+    transform: scale(1.05);
+}
+
+.world-video-placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--secondary-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 4rem;
+    color: var(--text-secondary);
+    z-index: 1;
+}
+
+.world-video-placeholder::before {
+    content: "🌎";
+}
+
+.world-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.7) 50%, transparent 100%);
+    padding: 20px;
+    z-index: 2;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    opacity: 1;
+}
+
+.world-name {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: calc(100% - 40px);
+    text-align: center;
+    font-family: 'Fjalla One', sans-serif;
+    font-weight: 900;
+    font-size: 2.2rem;
+    color: #ffffff;
+    text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.9);
+    line-height: 1.1;
+    z-index: 3;
+    pointer-events: none;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0;
+    animation: textFadeIn 1.2s ease-out forwards;
+}
+
+.world-description {
+    position: absolute;
+    top: calc(50% + 2rem);
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 40px);
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: var(--font-weight-normal);
+    color: #ffffff;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+    line-height: 1.3;
+    z-index: 3;
+    pointer-events: none;
+    opacity: 0;
+    animation: textFadeIn 1.2s ease-out 0.3s forwards;
+}
+
+.world-card[data-world-id="breach"] .world-name {
+    font-family: 'Fjalla One', sans-serif;
+    font-weight: 900;
+}
+
+.world-card[data-world-id="breach"]:hover {
+    border-color: #b19cd9; /* Changed from #c9a961 to purple */
+    box-shadow: 0 12px 35px rgba(177, 156, 217, 0.9), /* Updated to purple */
+                inset 0 0 30px rgba(177, 156, 217, 0.25); /* Updated inner glow to purple */
+}
+
+/* ========== ARTICLE CARDS ========== */
+.articles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 200px);
+    gap: 12px;
+    width: fit-content;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0;
+}
+
+.article-card {
+    position: relative;
+    width: 200px;
+    height: 370px;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    filter: saturate(0.9); /* NEW: 10% desaturation (90% saturation) */
+}
+
+.article-card:hover {
+    transform: translateY(-6px) scale(1.02);
+    filter: saturate(1); /* NEW: Full saturation on hover */
+}
+
+/* Tag-based styling */
+.article-card.tag-operator {
+    border-color: var(--card-border-operator);
+    box-shadow: 0 0 15px var(--card-glow-operator);
+}
+
+.article-card.tag-operator:hover {
+    box-shadow: 0 0 25px var(--card-glow-operator);
+}
+
+.article-card.tag-handler {
+    border-color: var(--card-border-handler);
+    box-shadow: 0 0 15px var(--card-glow-handler);
+}
+
+.article-card.tag-handler:hover {
+    box-shadow: 0 0 25px var(--card-glow-handler);
+}
+
+.article-card.tag-broker {
+    border-color: var(--card-border-broker);
+    box-shadow: 0 0 15px var(--card-glow-broker);
+}
+
+.article-card.tag-broker:hover {
+    box-shadow: 0 0 25px var(--card-glow-broker);
+}
+
+.article-card:not(.tag-operator):not(.tag-handler):not(.tag-broker) {
+    border-color: var(--card-border-default);
+    box-shadow: 0 0 15px var(--card-glow-default);
+}
+
+.card-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 10%;
+    z-index: 1;
+}
+
+.card-background-placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #3d3456, #2c2c3e); /* Purple gradient instead of beige */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    color: #b19cd9; /* Purple color for icon */
+    z-index: 1;
+}
+
+.card-background-placeholder::before {
+    content: "📄";
+}
+
+.card-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--card-overlay-gradient);
+    padding: 12px 14px;
+    min-height: 120px;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.card-title {
+    font-family: var(--font-family);
+    font-weight: var(--font-weight-heavy);
+    font-size: 1.1rem; /* Reduced from 1.3rem (15% smaller) */
+    color: #ffffff !important;
+    margin: 0 0 6px 0; /* Reduced from 8px */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    line-height: 1.2;
+    text-align: center;
+    width: 100%;
+}
+
+.card-summary {
+    font-family: var(--font-family);
+    font-weight: var(--font-weight-bold);
+    font-size: 0.8rem;
+    color: var(--text-color);
+    line-height: 1.3;
+    margin: 0;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+    display: none; /* Hide the summary */
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* ========== TAG-GROUPED LOCATIONS VIEW ========== */
+.tag-grouped-view {
+    width: fit-content;
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+.tag-group-section {
+    margin-bottom: 28px;
+}
+
+.tag-group-header {
+    font-family: var(--font-family);
+    font-weight: var(--font-weight-heavy);
+    font-size: 1rem;
+    color: rgba(201, 181, 230, 0.7);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    padding: 0 0 10px;
+    margin: 0 0 14px;
+    border-bottom: 1px solid rgba(201, 181, 230, 0.18);
+}
+
+.articles-grid--compact {
+    grid-template-columns: repeat(auto-fill, 200px);
+    gap: 12px;
+    width: fit-content;
+    max-width: 100%;
+    margin: 0;
+}
+
+.articles-grid--compact .article-card {
+    width: 200px;
+    height: 220px;
+}
+
+.articles-grid--compact .card-overlay {
+    min-height: 65px;
+    padding: 10px 12px;
+}
+
+.articles-grid--compact .card-title {
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+.articles-grid--compact .card-summary {
+    display: none;
+}

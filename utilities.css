@@ -1,0 +1,88 @@
+/*
+ * UTILITIES.CSS
+ * Helper classes and utility states: empty states, loading indicators, error messages
+ * Contains reusable state classes for when content is missing, loading, or has errors
+ * Depends on: base.css variables
+ */
+
+/* ========== UTILITY STATES ========== */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.empty-icon {
+    font-size: 64px;
+    margin-bottom: 16px;
+    opacity: 0.6;
+}
+
+.empty-state h3 {
+    font-size: 24px;
+    margin-bottom: 12px;
+    color: #ffffff;
+}
+
+.empty-state p {
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 8px;
+}
+
+.no-results, .no-tours {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-secondary);
+    font-weight: var(--font-weight-normal);
+}
+
+.no-tours {
+    font-style: italic;
+}
+
+.explore-submode-content .loading {
+    text-align: center;
+    padding: 40px 20px;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 16px;
+}
+
+/* ========== PANEL SKELETON LOADER ========== */
+.panel-skeleton {
+    display: grid;
+    grid-template-columns: repeat(6, 200px);
+    gap: 12px;
+    padding: 0 80px;
+    width: fit-content;
+    margin: 0 auto;
+}
+
+.skeleton-card {
+    width: 200px;
+    height: 370px;
+    border-radius: 12px;
+    background: linear-gradient(
+        90deg,
+        rgba(177, 156, 217, 0.06) 0%,
+        rgba(177, 156, 217, 0.14) 40%,
+        rgba(177, 156, 217, 0.06) 100%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.6s ease-in-out infinite;
+}
+
+@keyframes skeleton-shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.explore-submode-content .error {
+    text-align: center;
+    padding: 40px 20px;
+    color: #ff6b6b;
+    background: rgba(255, 107, 107, 0.1);
+    border: 1px solid rgba(255, 107, 107, 0.3);
+    border-radius: 8px;
+    margin: 20px;
+}

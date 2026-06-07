@@ -1,0 +1,584 @@
+/*
+ * COMPONENTS.CSS
+ * Reusable UI components: buttons, navigation, layout containers, toggles
+ * Contains back buttons, hub layout, and explore toggles
+ * Depends on: base.css variables
+ */
+
+/* ========== BACK BUTTON ========== */
+
+.back-btn, .tour-back-btn {
+    background: var(--button-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: var(--font-family);
+    font-weight: var(--font-weight-normal);
+}
+
+.back-btn:hover, .tour-back-btn:hover {
+    background: var(--button-hover);
+}
+
+/* ========== HUB LAYOUT - TILE STRUCTURE ========== */
+.world-hub {
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    /* iOS Safari: body { overflow: hidden } causes the html element's white background
+       to bleed through position:fixed overlays with background:transparent.
+       Android Chrome is unaffected. Fix: own the background here directly. */
+    background: linear-gradient(160deg, #0d0a12 0%, #1a1028 40%, #0f0c18 100%);
+    z-index: 100;
+}
+
+/* ── Hub Header ── */
+.hub-header {
+    display: flex !important; /* override old rule below */
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 28px;
+    height: 64px;
+    flex-shrink: 0;
+    background: rgba(13, 10, 18, 0.88);
+    border-bottom: 1px solid rgba(177, 156, 217, 0.18);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    z-index: 20;
+}
+
+.hub-header-start {
+    flex: 1;
+}
+
+.hub-header-end {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    justify-content: flex-start;
+}
+
+.hub-header-start .logo-container {
+    margin: 0;
+}
+
+.hub-header-start .logo {
+    height: 36px;
+}
+
+.hub-center-logo {
+    height: 42px;
+    cursor: pointer;
+    display: block;
+}
+
+.hub-header-center {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.hub-title-text {
+    font-family: var(--font-ui);
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: rgba(177, 156, 217, 0.55);
+    text-transform: uppercase;
+    letter-spacing: 4px;
+}
+
+.hub-panel-nav {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.hub-back-btn {
+    background: transparent;
+    border: 1px solid rgba(177, 156, 217, 0.3);
+    color: #c9b5e6;
+    padding: 5px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: var(--font-ui);
+    font-size: 0.75rem;
+    transition: all 0.2s ease;
+}
+
+.hub-back-btn:hover {
+    background: rgba(177, 156, 217, 0.12);
+    border-color: #b19cd9;
+}
+
+.hub-panel-nav-title {
+    font-family: var(--font-ui);
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #b19cd9;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+}
+
+.hub-action-btn {
+    padding: 7px 20px;
+    background: transparent;
+    border: 1.5px solid rgba(177, 156, 217, 0.35);
+    border-radius: 6px;
+    color: #e8e0f0;
+    font-family: var(--font-ui);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.hub-action-btn:hover {
+    background: rgba(177, 156, 217, 0.14);
+    border-color: #b19cd9;
+    box-shadow: 0 0 12px rgba(177, 156, 217, 0.25);
+}
+
+/* ── Hub Main Area ── */
+.hub-main-area {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(177, 156, 217, 0.3) transparent;
+}
+
+.hub-main-area::-webkit-scrollbar { width: 6px; }
+.hub-main-area::-webkit-scrollbar-track { background: transparent; }
+.hub-main-area::-webkit-scrollbar-thumb {
+    background: rgba(177, 156, 217, 0.3);
+    border-radius: 3px;
+}
+
+/* ── Hub Selection Grid ── */
+.hub-selection {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 0 60px 200px;
+    gap: 56px;
+    transition: opacity 0.2s ease;
+}
+
+.hub-section {
+    width: 100%;
+    max-width: 1200px;
+}
+
+.hub-section-header {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 16px;
+}
+
+.hub-section-line {
+    flex: 1;
+    height: 1px;
+    background: rgba(177, 156, 217, 0.3);
+}
+
+.hub-section-label {
+    font-family: var(--font-ui);
+    font-size: 1.4rem;
+    letter-spacing: 6px;
+    color: #ffffff;
+    text-transform: uppercase;
+    flex-shrink: 0;
+    font-weight: 600;
+}
+
+.hub-tiles-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px;
+}
+
+.hub-tile {
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 144px;
+    padding: 14px 38px 12px;
+    background: rgba(177, 156, 217, 0.05);
+    border: 1px solid rgba(177, 156, 217, 0.18);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.22s ease, border-color 0.22s ease, transform 0.22s ease, box-shadow 0.22s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+}
+
+.hub-tile:hover {
+    background: rgba(177, 156, 217, 0.12);
+    border-color: rgba(177, 156, 217, 0.45);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 18px rgba(177, 156, 217, 0.12);
+}
+
+.tile-name {
+    font-family: var(--font-ui);
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #e4dcf0;
+    display: block;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.tile-sub {
+    font-size: 0.86rem;
+    color: rgba(201, 181, 230, 0.5);
+    font-family: var(--font-ui);
+    display: block;
+    font-weight: 400;
+    text-align: center;
+}
+
+/* ── Hub Content Area ── */
+.hub-content-area {
+    width: 100%;
+    min-height: 100%;
+    box-sizing: border-box;
+}
+
+.hub-content-area .panel-content {
+    padding: 28px 40px 100px;
+    min-height: 100%;
+}
+
+/* Collapsed header with panel pills */
+.hub-collapsed-header {
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+    background: transparent;
+    backdrop-filter: none;
+    border: none;
+    box-shadow: none;
+    flex-shrink: 0;
+    min-height: 0;
+}
+
+.panel-selector {
+    position: relative;
+    z-index: 2;
+}
+
+.panel-content {
+    position: relative;
+    z-index: 2;
+}
+
+/* panel-bg-video properties are defined in cards.css */
+
+.panel-header {
+    padding: 30px 20px;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.5);
+    border-bottom: 1px solid rgba(177, 156, 217, 0.2);
+    flex-shrink: 0;
+}
+
+.panel-header h2 {
+    font-size: 2rem;
+    font-weight: 900;
+    color: #b19cd9;
+    margin: 0 0 8px 0;
+    font-family: var(--font-family);
+}
+
+.panel-header p {
+    font-size: 0.95rem;
+    color: #c9b5e6;
+    margin: 0;
+}
+
+/* Panel selector - initial view */
+.panel-selector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    padding: 40px;
+    text-align: center;
+    gap: 16px;
+    position: relative;
+    z-index: 2;
+}
+
+.panel-star {
+    font-size: 1.4rem;
+    color: rgba(255, 255, 255, 0.35);
+    display: block;
+    margin-bottom: 4px;
+    transition: color 0.3s ease;
+}
+
+
+.panel-selector h2 {
+    font-size: clamp(0.6rem, 7cqw, 1.8rem);
+    font-weight: 900;
+    margin: 0;
+    font-family: var(--font-ui) !important;
+    letter-spacing: clamp(0px, 0.4cqw, 4px);
+    text-transform: uppercase;
+    color: #ffffff !important;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.85), 0 4px 20px rgba(0, 0, 0, 0.6);
+    width: 100%;
+    text-align: center;
+    padding: 0 8px;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+/* Per-panel gradient text — removed, all titles are plain white */
+
+.panel-selector p {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin: 0;
+    font-family: var(--font-ui);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    opacity: 0.35;
+    transition: opacity 0.3s ease, text-shadow 0.3s ease;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.9), 0 2px 16px rgba(0, 0, 0, 0.7);
+}
+
+.panel-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 20px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(177, 156, 217, 0.35) transparent;
+}
+
+.panel-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.panel-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.panel-content::-webkit-scrollbar-thumb {
+    background: rgba(177, 156, 217, 0.35);
+    border-radius: 3px;
+}
+
+.panel-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(177, 156, 217, 0.6);
+}
+
+.maps-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    font-size: 1.5rem;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    font-size: 1rem;
+    color: var(--text-secondary);
+}
+
+/* (old override removed — hub-header is now defined above) */
+
+.hub-content {
+    min-height: 400px;
+    padding: 20px;
+    background: none;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    border: none;
+    max-width: 100%; /* Ensure it uses full width */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* ========== EXPLORE MODE TOGGLE ========== */
+.explore-toggle-bar {
+    display: flex;
+    background: rgba(255, 255, 255, 0.1);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 8px;
+    gap: 8px;
+    margin-bottom: 0;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.explore-tab {
+    flex: 1;
+    padding: 12px 20px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-family: var(--font-family);
+    white-space: nowrap;
+}
+
+.explore-tab:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.9);
+    transform: translateY(-1px);
+}
+
+.explore-tab.active {
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.explore-tab.active:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.explore-content {
+    animation: fadeIn 0.3s ease-out;
+}
+
+.explore-submode-content {
+    min-height: 400px;
+}
+
+/* ========== EXPLORE MODE TOGGLE (new separated buttons) ========== */
+.explore-toggle-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+    padding: 15px 20px;
+}
+
+.explore-primary-btn {
+    padding: 12px 24px;
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    border-radius: 0;
+    color: rgba(255, 255, 255, 0.7);
+    font-family: var(--font-family);
+    font-weight: var(--font-weight-bold);
+    font-size: 1.2rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.explore-primary-btn::after {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    left: 0;
+    width: 0;
+    height: 3px;
+    background: #b19cd9;
+    transition: width 0.3s ease;
+    box-shadow: 0 0 10px rgba(177, 156, 217, 0.5);
+}
+
+.explore-primary-btn:hover {
+    color: #ffffff;
+    text-shadow: 0 0 20px rgba(177, 156, 217, 0.6);
+}
+
+.explore-primary-btn:hover::after {
+    width: 100%;
+}
+
+.explore-primary-btn.active {
+    color: #ffffff;
+    border-bottom-color: #b19cd9;
+    text-shadow: 0 0 20px rgba(177, 156, 217, 0.8);
+}
+
+.explore-primary-btn.active::after {
+    width: 100%;
+}
+
+/* Breach edit: bigger font size on buttons */
+body.world-breach .explore-primary-btn {
+    font-size: 1.4rem;
+    font-weight: var(--font-weight-heavy);
+}
+
+/* Responsive: stack buttons on small screens */
+@media (max-width: 520px) {
+    .explore-toggle-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.container {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    transition: opacity 0.5s ease;
+    background: transparent;
+}
+
+/* ========== LANDING PAGE STYLES ========== */
+.landing-screen {
+    /* ...existing code... */
+    background: transparent; /* NEW: let bg videos show through */
+    position: relative;
+    z-index: 1; /* Ensure landing content stays above background layer */
+}
+
+main {
+    /* ...existing code... */
+    background: transparent; /* NEW: let bg videos show through */
+}

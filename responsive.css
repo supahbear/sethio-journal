@@ -1,0 +1,504 @@
+/*
+ * RESPONSIVE.CSS
+ * Mobile and tablet breakpoints for all components
+ * Contains responsive overrides for typography, layout, cards, navigation, and modals
+ * Depends on: base.css variables and all component files
+ * Load this last to override everything else
+ */
+
+/* ========== MOBILE BREAKPOINT ========== */
+@media (max-width: 768px) {
+    /* Base typography adjustments */
+    h1 {
+        font-size: 2rem;
+    }
+
+    .logo {
+        height: 60px;
+    }
+
+    /* Hub header: column stack on mobile — avoids flex-wrap which can cause
+       iOS Safari to mis-route taps to the underlying scroll container.
+       Row 1: hub-header-center (logo or back btn + title)
+       Row 2: hub-header-end (Campaign Log / Journal / Calendar) */
+    .hub-header {
+        padding: 4px 10px 0;
+        height: auto;
+        min-height: auto;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+        position: relative;
+        z-index: 25;
+    }
+
+    /* Start div is always empty — hide it entirely */
+    .hub-header-start {
+        display: none;
+    }
+
+    /* Row 1: logo or panel nav — natural height, left-aligned contents */
+    .hub-header-center {
+        flex: 0 0 auto;
+        width: 100%;
+        min-width: 0;
+        justify-content: flex-start;
+        padding: 4px 0 2px;
+    }
+
+    /* Panel nav: back btn + title next to each other, title truncates */
+    .hub-panel-nav {
+        gap: 8px;
+        min-width: 0;
+    }
+
+    .hub-panel-nav-title {
+        font-size: 0.78rem;
+        letter-spacing: 2px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* Larger touch target for the back button (min 44px per Apple HIG) */
+    .hub-back-btn {
+        flex-shrink: 0;
+        padding: 10px 14px;
+        font-size: 0.68rem;
+        min-height: 44px;
+    }
+
+    /* Row 2: action buttons full-width, centered, with top separator */
+    .hub-header-end {
+        flex: 0 0 auto;
+        width: 100%;
+        justify-content: center;
+        gap: 6px;
+        padding: 5px 0 6px;
+        border-top: 1px solid rgba(177, 156, 217, 0.12);
+        margin-top: 3px;
+    }
+
+    .hub-action-btn {
+        padding: 5px 10px;
+        font-size: 0.65rem;
+        letter-spacing: 0;
+        white-space: nowrap;
+    }
+
+    /* Hub selection: reduce horizontal padding so tiles breathe,
+       and add vertical padding so COMPENDIUM doesn't crowd the nav */
+    .hub-selection {
+        padding: 28px 16px 60px;
+        gap: 36px;
+        justify-content: flex-start;
+    }
+
+    /* Section labels slightly smaller, lines more visible */
+    .hub-section-label {
+        font-size: 1.1rem;
+        letter-spacing: 4px;
+    }
+
+    /* Tiles: stack full-width with a left-right layout */
+    .hub-tiles-row {
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .hub-tile {
+        width: 100%;
+        min-width: unset;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 18px;
+    }
+
+    .tile-name {
+        font-size: 1rem;
+        text-align: left;
+    }
+
+    .tile-sub {
+        font-size: 0.78rem;
+        text-align: right;
+    }
+
+    /* World cards mobile layout */
+    .worlds-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .world-card {
+        height: 300px;
+    }
+
+    .world-name {
+        font-size: 1.8rem;
+    }
+
+    /* ========== ARTICLE GRID: 3-column miniaturized layout ========== */
+    .articles-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        width: 100%;
+    }
+
+    .article-card {
+        width: 100%;
+        height: 260px;
+    }
+
+    .card-title {
+        font-size: 0.78rem;
+        margin-bottom: 0;
+        line-height: 1.2;
+    }
+
+    .card-overlay {
+        padding: 8px;
+        min-height: 60px;
+    }
+
+    /* Article filter bar: keep row layout so buttons sit beside each other;
+       filter-groups are 100% wide so they still stack, but the action buttons
+       (clear / +new) share the last row since they have no explicit width */
+    .article-filters {
+        flex-direction: row;
+        flex-wrap: wrap;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .filter-group {
+        width: 100%;
+    }
+
+    /* Grid aligns to filter bar width — remove desktop indent */
+    .article-viewer .articles-grid {
+        padding: 0;
+        width: 100%;
+    }
+
+    /* ========== MODALS ========== */
+    /* All fixed-position modals: stretch to full viewport width so centering
+       works reliably on mobile (parent has no defined width otherwise) */
+    .article-modal, .tour-modal,
+    .journal-modal, .calendar-modal, .recaps-modal {
+        top: 5vh;
+        left: 0;
+        right: 0;
+        width: 100%;
+        transform: none;
+    }
+
+    .modal-content {
+        width: 94%;
+        max-width: 94%;
+        height: 90vh;
+        max-height: 90vh;
+        margin: 0 auto;
+        border-radius: 10px;
+    }
+
+    .modal-header {
+        padding: 8px 16px;
+    }
+
+    .modal-header h2 {
+        font-size: 1.2rem;
+    }
+
+    .modal-body {
+        max-height: calc(90vh - 50px);
+    }
+
+    /* Article modal: image fixed, title pinned, only page content scrolls.
+       columns → flex column; image-col fixed 180px; text-col fills rest as flex column;
+       pages-container scrolls inside text-col. Nothing above the divider ever moves. */
+    .article-modal .modal-body {
+        overflow: hidden;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    .article-modal-columns {
+        display: flex !important;
+        flex-direction: column !important;
+        flex: 1 !important;
+        min-height: 0 !important;
+        overflow: hidden !important;
+        align-items: stretch !important;
+    }
+
+    .article-modal-text-col {
+        display: flex !important;
+        flex-direction: column !important;
+        flex: 1 !important;
+        min-height: 0 !important;
+        min-width: 0 !important;
+        overflow: hidden !important;
+    }
+
+    .article-pages-container {
+        flex: 1 !important;
+        min-height: 0 !important;
+        height: auto !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Hide inactive pages via display so they occupy zero height */
+    .article-page {
+        display: none !important;
+        position: relative !important;
+        height: auto !important;
+        overflow: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+    }
+
+    .article-page.active {
+        display: block !important;
+    }
+
+    /* Nav always visible at the bottom — never scrolled away */
+    .article-nav-mount {
+        flex-shrink: 0;
+    }
+
+    .article-navigation {
+        margin-top: 0;
+        padding: 6px 0;
+    }
+
+    /* Dots: scrollable single row — active dot is scrolled into center */
+    .article-dots {
+        flex-wrap: nowrap !important;
+        min-width: 0;
+        flex-shrink: 1;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .article-dots::-webkit-scrollbar { display: none; }
+
+    .article-dot {
+        flex-shrink: 0;
+        width: 7px !important;
+        height: 7px !important;
+    }
+
+    /* Article modal: two columns collapse to single column */
+    .article-modal-columns {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .article-modal-image-col {
+        justify-content: center;
+        margin-bottom: 0;
+        flex-shrink: 0 !important;
+        height: 180px !important;
+        min-height: 180px !important;
+        overflow: hidden;
+    }
+
+    .article-modal-image-col .article-image {
+        width: 100% !important;
+        height: 180px !important;
+        aspect-ratio: unset !important;
+        max-width: 100% !important;
+        max-height: 180px !important;
+        object-fit: cover !important;
+        flex: none !important;
+    }
+
+    /* ========== CAMPAIGN LOG (RECAPS) ========== */
+    .recaps-modal-body {
+        padding: 0 18px 28px;
+    }
+
+    .recap-entry {
+        padding: 18px 0 4px;
+    }
+
+    .recap-title {
+        font-size: 1.3rem;
+    }
+
+    /* ========== CALENDAR ========== */
+    .calendar-modal-body {
+        padding: 14px 10px 20px;
+    }
+
+    /* Month tabs: scrollable single row so all 7 months fit */
+    .cal-tabs-row {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        flex-wrap: nowrap;
+        gap: 0;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        padding-bottom: 1px;
+    }
+
+    .cal-tabs-row::-webkit-scrollbar { display: none; }
+
+    .cal-month-tab {
+        flex: 0 0 auto;
+        font-size: 0.6rem;
+        padding: 7px 8px 6px;
+        letter-spacing: 0.8px;
+    }
+
+    /* Shorter day cells on mobile */
+    .calendar-table td {
+        height: 52px;
+        padding: 18px 2px 4px;
+    }
+
+    /* ========== JOURNAL ========== */
+    /* Reduce the 80px side padding on campaign log / leads tabs to fit mobile */
+    #journalTabCampaignLog {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    #journalTabLeads {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    /* Release the height:100% constraints that cause sidebar/detail overlap
+       in single-column mode, then let the body scroll naturally */
+    .journal-modal-body {
+        overflow-y: auto;
+    }
+
+    .journal-modal-body .quest-viewer,
+    .journal-modal-body .quest-layout {
+        height: auto;
+    }
+
+    /* Single-column layout: sidebar list on top, detail below */
+    .quest-layout {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .quest-sidebar {
+        position: static;
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .quest-content {
+        min-height: 200px;
+    }
+
+    .quest-viewer {
+        padding: 0 4px;
+    }
+
+    /* ========== EXPLORE TOGGLE ========== */
+    /* Explore toggle mobile layout */
+    .explore-toggle-bar {
+        flex-direction: column;
+        gap: 4px;
+        padding: 6px;
+    }
+
+    .explore-tab {
+        padding: 16px 20px;
+        font-size: 16px;
+    }
+
+    /* ========== GALLERY ========== */
+    .gallery-modal {
+        top: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: 100%;
+        max-width: 100%;
+        transform: none;
+        border-radius: 0;
+    }
+
+    .gallery-modal-content {
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+        border-top: none;
+    }
+
+    /* Header: stack add-button below title/close row */
+    .gallery-modal-header {
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 10px 14px;
+    }
+
+    .gallery-modal-header h2 {
+        font-size: 1.1rem;
+        flex: 1 1 auto;
+    }
+
+    .gallery-add-btn {
+        order: 3;
+        width: 100%;
+        text-align: center;
+        padding: 8px;
+        font-size: 0.8rem;
+    }
+
+    /* Form: inputs stack vertically */
+    .gallery-form-area {
+        padding: 10px 14px 12px;
+    }
+
+    .gallery-form-row-fields {
+        flex-direction: column;
+    }
+
+    .gallery-input-url,
+    .gallery-input-title,
+    .gallery-input-artist,
+    .gallery-textarea {
+        flex: none;
+        width: 100%;
+    }
+
+    /* Grid: 2 columns on phone */
+    .gallery-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .gallery-body {
+        padding: 14px;
+    }
+
+    /* Lightbox: full-screen, stacked layout */
+    .gallery-lightbox {
+        padding: 56px 12px 20px;
+        border-radius: 0;
+    }
+
+    .gallery-lightbox-img {
+        max-height: 52vh;
+    }
+
+    .gallery-lightbox-title {
+        font-size: 1rem;
+    }
+
+    .gallery-lightbox-desc {
+        font-size: 0.82rem;
+    }
+}
