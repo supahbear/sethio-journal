@@ -6,7 +6,6 @@ class TTRPGHub {
   }
 
   async init() {
-    this._warmCache([Config.SHEETS.RECAPS, Config.SHEETS.COMMENTS, Config.SHEETS.GALLERY]);
     this.initModalHandlers();
     this.initButtons();
     this._initHashRouting();
@@ -152,29 +151,34 @@ class TTRPGHub {
     const campaignPanel = document.getElementById('journalTabCampaignLog');
 
     if (campaignPanel && !campaignPanel.dataset.loaded) {
-      campaignPanel.innerHTML = '<div class="recaps-loading">Loading\u2026</div>';
-      try {
-        const [entries, commentRows] = await Promise.all([
-          this.loadSheets([Config.SHEETS.RECAPS]),
-          this.loadSheets([Config.SHEETS.COMMENTS]).catch(() => [])
-        ]);
-        const commentsMap = {};
-        for (const c of commentRows) {
-          const title = (c.recap_title || '').trim();
-          const char  = (c.character  || '').trim().toLowerCase();
-          if (!commentsMap[title]) commentsMap[title] = {};
-          if (!commentsMap[title][char]) commentsMap[title][char] = [];
-          commentsMap[title][char].push(c);
-        }
-        campaignPanel.innerHTML = this.renderRecapsList(entries, commentsMap);
-        campaignPanel.dataset.loaded = 'true';
-        if (this._recapsAbortController) this._recapsAbortController.abort();
-        this._recapsAbortController = new AbortController();
-        this._setupRecapsInteractions(campaignPanel, this._recapsAbortController.signal);
-      } catch (e) {
-        campaignPanel.innerHTML = '<div class="recaps-loading">Could not load campaign log.</div>';
-        Config.warn('Campaign log load error:', e);
+      await this._loadCampaignPanel(campaignPanel);
+    }
+  }
+
+  async _loadCampaignPanel(panel) {
+    panel.innerHTML = '<div class="recaps-loading">Loading\u2026</div>';
+    try {
+      const url  = Config.getSheetUrl([Config.SHEETS.RECAPS, Config.SHEETS.COMMENTS]);
+      const data = await this.jsonp(url);
+      if (!data.success) throw new Error(data.error || 'API error');
+      const entries     = (data.data || []).filter(r => r._category === Config.SHEETS.RECAPS);
+      const commentRows = (data.data || []).filter(r => r._category === Config.SHEETS.COMMENTS);
+      const commentsMap = {};
+      for (const c of commentRows) {
+        const t  = (c.recap_title || '').trim();
+        const ch = (c.character   || '').trim().toLowerCase();
+        if (!commentsMap[t]) commentsMap[t] = {};
+        if (!commentsMap[t][ch]) commentsMap[t][ch] = [];
+        commentsMap[t][ch].push(c);
       }
+      panel.innerHTML = this.renderRecapsList(entries, commentsMap);
+      panel.dataset.loaded = 'true';
+      if (this._recapsAbortController) this._recapsAbortController.abort();
+      this._recapsAbortController = new AbortController();
+      this._setupRecapsInteractions(panel, this._recapsAbortController.signal);
+    } catch (e) {
+      panel.innerHTML = '<div class="recaps-loading">Could not load campaign log.</div>';
+      Config.warn('Campaign log load error:', e);
     }
   }
 
@@ -823,30 +827,7 @@ class TTRPGHub {
         const panel = body.closest('#journalTabCampaignLog');
         if (panel) {
           delete panel.dataset.loaded;
-          panel.innerHTML = '<div class="recaps-loading">Loadingâ€¦</div>';
-          try {
-            delete this._sheetCache[Config.SHEETS.RECAPS];
-            delete this._sheetCache[Config.SHEETS.COMMENTS];
-            const [entries, commentRows] = await Promise.all([
-              this.loadSheets([Config.SHEETS.RECAPS]),
-              this.loadSheets([Config.SHEETS.COMMENTS]).catch(() => [])
-            ]);
-            const commentsMap = {};
-            for (const c of commentRows) {
-              const t = (c.recap_title || '').trim();
-              const ch = (c.character || '').trim().toLowerCase();
-              if (!commentsMap[t]) commentsMap[t] = {};
-              if (!commentsMap[t][ch]) commentsMap[t][ch] = [];
-              commentsMap[t][ch].push(c);
-            }
-            panel.innerHTML = this.renderRecapsList(entries, commentsMap);
-            panel.dataset.loaded = 'true';
-            if (this._recapsAbortController) this._recapsAbortController.abort();
-            this._recapsAbortController = new AbortController();
-            this._setupRecapsInteractions(panel, this._recapsAbortController.signal);
-          } catch (err) {
-            panel.innerHTML = '<div class="recaps-loading">Could not reload.</div>';
-          }
+          await this._loadCampaignPanel(panel);
         }
       } else {
         submitBtn.textContent = 'Create Chapter';
