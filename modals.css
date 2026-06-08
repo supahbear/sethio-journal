@@ -944,6 +944,17 @@ body.modal-active main {
     box-shadow: 0 20px 60px rgba(177, 156, 217, 0.3);
 }
 
+.journal-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.journal-body::-webkit-scrollbar { display: none; }
+
 .journal-modal-header {
     justify-content: center !important;
     position: relative;
@@ -1010,11 +1021,26 @@ body.modal-active main {
     position: relative;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(177, 156, 217, 0.35) transparent;
 }
 
-.journal-tab-panels::-webkit-scrollbar { display: none; }
+.journal-tab-panels::-webkit-scrollbar {
+    width: 6px;
+}
+
+.journal-tab-panels::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.journal-tab-panels::-webkit-scrollbar-thumb {
+    background: rgba(177, 156, 217, 0.35);
+    border-radius: 3px;
+}
+
+.journal-tab-panels::-webkit-scrollbar-thumb:hover {
+    background: rgba(177, 156, 217, 0.6);
+}
 
 .journal-tab-panel {
     display: none;
