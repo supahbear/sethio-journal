@@ -50,7 +50,7 @@ class TTRPGHub {
         reject(new Error('JSONP request failed - script load error'));
       };
       
-      // Handle timeout â€” replace with a no-op instead of deleting, so a late-arriving
+      // Handle timeout — replace with a no-op instead of deleting, so a late-arriving
       // Apps Script response doesn't throw "ReferenceError: jsonp_callback_... is not defined"
       const timeout = setTimeout(() => {
         try {
@@ -198,7 +198,7 @@ class TTRPGHub {
   _renderMarkdown(text) {
     return String(text).split('\n').map(line => {
       let s = line.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-      // Block: headings (must be at line start â€” rendered as styled spans to avoid global h-tag conflicts)
+      // Block: headings (must be at line start — rendered as styled spans to avoid global h-tag conflicts)
       if (/^### /.test(s)) return `<strong class="recap-md-h3">${s.slice(4)}</strong>`;
       if (/^## /.test(s))  return `<strong class="recap-md-h2">${s.slice(3)}</strong>`;
       if (/^# /.test(s))   return `<strong class="recap-md-h1">${s.slice(2)}</strong>`;
@@ -437,7 +437,7 @@ class TTRPGHub {
     }
 
     if (saveBtn) saveBtn.disabled = true;
-    if (status) { status.textContent = 'Savingâ€¦'; status.style.color = '#c9b5e6'; }
+    if (status) { status.textContent = 'Saving…'; status.style.color = '#c9b5e6'; }
 
     const isEdit = !!this._galleryEditingId;
     const rowId  = isEdit ? this._galleryEditingId : String(Date.now());
@@ -473,7 +473,7 @@ class TTRPGHub {
 
     } catch (err) {
       Config.error('Gallery save error:', err);
-      if (status) { status.textContent = 'Network error â€” check console.'; status.style.color = '#eb5757'; }
+      if (status) { status.textContent = 'Network error — check console.'; status.style.color = '#eb5757'; }
     } finally {
       if (saveBtn) saveBtn.disabled = false;
     }
@@ -557,16 +557,16 @@ class TTRPGHub {
         const charComments = (commentsMap[title]?.[c] || []);
         const marginsNotes = charComments.map(cm => `
           <div class="margin-note">
-            <p class="margin-text">${this._esc(cm.text || '')}<br><span class="margin-sig">â€” ${this._esc(cm.author || 'Anonymous')}</span></p>
+            <p class="margin-text">${this._esc(cm.text || '')}<br><span class="margin-sig">— ${this._esc(cm.author || 'Anonymous')}</span></p>
           </div>`).join('');
         const marginsSection = `
           <div class="recap-margins">
-            <div class="recap-margins-label">written in the marginsâ€¦</div>
+            <div class="recap-margins-label">written in the margins…</div>
             <div class="recap-margins-comments" data-recap-title="${this._esc(title)}" data-char="${c}">${marginsNotes}</div>
             <div class="recap-margins-form">
-              <textarea class="margin-input-text" placeholder="Leave a noteâ€¦" rows="2"></textarea>
+              <textarea class="margin-input-text" placeholder="Leave a note…" rows="2"></textarea>
               <div class="margin-form-row">
-                <input class="margin-input-author" type="text" placeholder="â€” your name" maxlength="40" />
+                <input class="margin-input-author" type="text" placeholder="— your name" maxlength="40" />
                 <button class="margin-submit-btn" data-index="${i}" data-char="${c}">Add Note</button>
               </div>
             </div>
@@ -699,7 +699,7 @@ class TTRPGHub {
         const char     = panel.dataset.panel;
         const index    = parseInt(panel.closest('.recap-entry').dataset.index, 10);
         const newText  = textarea.value.trim();
-        saveBtn.textContent = 'Savingâ€¦';
+        saveBtn.textContent = 'Saving…';
         saveBtn.disabled = true;
         const result = await this._saveRecapCharEntry(index, char, newText);
         if (result?.success) {
@@ -780,14 +780,14 @@ class TTRPGHub {
         const index      = parseInt(marginBtn.dataset.index, 10);
         const char       = marginBtn.dataset.char || '';
         if (!text) { textEl.focus(); return; }
-        marginBtn.textContent = 'Addingâ€¦';
+        marginBtn.textContent = 'Adding…';
         marginBtn.disabled = true;
         const result = await this._saveRecapComment(index, text, author, char);
         if (result?.success) {
           const commentsEl = panel.querySelector('.recap-margins-comments');
           const note = document.createElement('div');
           note.className = 'margin-note';
-          note.innerHTML = `<p class="margin-text">${this._esc(text)}<br><span class="margin-sig">â€” ${this._esc(author)}</span></p>`;
+          note.innerHTML = `<p class="margin-text">${this._esc(text)}<br><span class="margin-sig">— ${this._esc(author)}</span></p>`;
           commentsEl.appendChild(note);
           textEl.value   = '';
           authorEl.value = '';
@@ -819,7 +819,7 @@ class TTRPGHub {
         return;
       }
       errEl.hidden = true;
-      submitBtn.textContent = 'Creatingâ€¦';
+      submitBtn.textContent = 'Creating…';
       submitBtn.disabled = true;
       const result = await this._saveNewChapter({ title, chapter, content });
       if (result?.success) {
