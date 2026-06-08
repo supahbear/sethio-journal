@@ -540,7 +540,7 @@ class TTRPGHub {
     this._recapEntries = sorted; // stash for edit handler
     const items = sorted.map((entry, i) => {
       const chapter = (entry.chapter || '').trim();
-      const title   = (entry.title   || '').trim();
+      const title   = (entry.titlename || '').trim();
       const content = (entry.summary  || '').trim();
       const words   = content.split(/\s+/).filter(Boolean);
       const isTruncated = words.length > WORD_LIMIT;
@@ -851,7 +851,7 @@ class TTRPGHub {
       // Send only the changed field (patch mode) to keep the URL short
       const payload = JSON.stringify({
         sheet: 'Recaps',
-        originalName: entry.title,
+        originalName: entry.titlename,
         patch: true,
         row: { [char]: text }
       });
@@ -869,7 +869,7 @@ class TTRPGHub {
     try {
       const row = {
         id:      Date.now().toString(),
-        title,
+        titlename: title,
         chapter,
         summary: content,
         visible: 'TRUE'
@@ -891,7 +891,7 @@ class TTRPGHub {
       if (!entry) return { success: false, error: 'Entry not found' };
       const row = {
         id:          Date.now().toString(),
-        recap_title: entry.title || '',
+        recap_title: entry.titlename || '',
         character,
         author,
         text,

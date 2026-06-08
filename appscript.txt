@@ -87,7 +87,7 @@ function handleWrite(e, callback) {
       try { notifyDiscord(sheetName, rowData); } catch (err) { console.warn('notifyDiscord failed:', err); }
     }
 
-    console.log('Appended row to ' + sheetName + ': ' + (rowData.title || rowData.name || '(unnamed)'));
+    console.log('Appended row to ' + sheetName + ': ' + (rowData.titlename || rowData.name || '(unnamed)'));
     return jsonp(callback, { success: true });
 
   } catch (err) {
@@ -132,8 +132,8 @@ function handleEdit(e, callback) {
       const idVals = sheet.getRange(2, idCol + 1, lastRow - 1, 1).getValues();
       matchIdx = idVals.findIndex(r => String(r[0]).trim() === String(rowId).trim());
     } else {
-      const matchCol = headers.indexOf('title');
-      if (matchCol === -1) return jsonp(callback, { success: false, error: 'No "title" column in sheet' });
+      const matchCol = headers.indexOf('titlename');
+      if (matchCol === -1) return jsonp(callback, { success: false, error: 'No "titlename" column in sheet' });
       const matchVals = sheet.getRange(2, matchCol + 1, lastRow - 1, 1).getValues();
       matchIdx = matchVals.findIndex(r => String(r[0]).trim().toLowerCase() === origName.trim().toLowerCase());
     }
@@ -164,7 +164,7 @@ function handleEdit(e, callback) {
       }
     }
 
-    console.log('Updated row in ' + sheetName + ': ' + (rowData.title || rowId || origName));
+    console.log('Updated row in ' + sheetName + ': ' + (rowData.titlename || rowId || origName));
     return jsonp(callback, { success: true });
 
   } catch (err) {
@@ -260,7 +260,7 @@ function pick(arr) {
 
 // New recap chapter posted (OOC)
 function buildRecapEmbed(rowData) {
-  const title   = String(rowData.title   || '').trim();
+  const title   = String(rowData.titlename || '').trim();
   const chapter = String(rowData.chapter || '').trim();
   const teaser  = (() => { const s = String(rowData.summary || '').trim(); return s.length > 200 ? s.slice(0, 197) + '...' : s; })();
   const url     = JOURNAL_BASE_URL + '#journal/recap/' + slugify(title);

@@ -945,7 +945,8 @@ body.modal-active main {
 }
 
 .journal-modal-header {
-    justify-content: space-between !important;
+    justify-content: center !important;
+    position: relative;
     background: rgba(26, 21, 16, 0.98) !important;
     border-bottom: 2px solid rgba(177, 156, 217, 0.25) !important;
     gap: 16px;
@@ -955,6 +956,14 @@ body.modal-active main {
     color: #b19cd9 !important;
     font-family: var(--font-ui) !important;
     letter-spacing: 0.1em;
+    text-align: center;
+}
+
+.journal-modal-header .close-btn {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
 }
 
 /* ── Tab bar ── */
